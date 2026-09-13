@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Tenant {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  phone       String?
+  pinHash     String
+  roomId      Int?      @unique
+  moveInDate  DateTime?
+  deposit     Float?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  room        Room?     @relation(fields: [roomId], references: [id])
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  rooms     Room[]
+}
+
+model Room {
+  id            Int            @id @default(autoincrement())
+  locationId    Int
+  roomNumber    String
+  roomType      String?
+  baseRent      Float
+  waterRate     Float
+  electricRate  Float
+  location      Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  options       RoomOption[]
+  meterReadings MeterReading[]
+  bills         Bill[]
+  tenant        Tenant?
+
+  @@unique([locationId, roomNumber])
+}
+
+model RoomOption {
+  id     Int    @id @default(autoincrement())
+  roomId Int
+  name   String
+  price  Float
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model MeterReading {
+  id              Int      @id @default(autoincrement())
+  roomId          Int
+  period          String
+  waterReading    Float
+  electricReading Float
+  createdAt       DateTime @default(now())
+  room            Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, period])
+}
+
+model Bill {
+  id            Int           @id @default(autoincrement())
+  roomId        Int
+  period        String
+  baseRent      Float
+  waterUnits    Float
+  waterCost     Float
+  electricUnits Float
+  electricCost  Float
+  optionsCost   Float
+  total         Float
+  paymentStatus        String        @default("UNPAID")
+  paidAt               DateTime?
+  paymentSlipUrl       String?
+  paymentSubmittedAt   DateTime?
+  paymentNote          String?
+  paymentRejectionReason String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  room          Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  lineItems     BillLineItem[]
+
+  @@unique([roomId, period])
+}
+
+model BillLineItem {
+  id     Int    @id @default(autoincrement())
+  billId Int
+  label  String
+  amount Float
+  bill   Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+}

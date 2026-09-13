@@ -1,0 +1,15 @@
+# Dockerfile for nginx reverse proxy
+# Proxies HTTP requests to apartment-oat-app Next.js application
+# Must run within same docker network as apartment-oat-app
+# Usage: docker build -f design/Dockerfile.mockup -t apartment-mockup .
+#        docker run -d -p 8089:80 --network apartment-oat_default --name apartment-mockup apartment-mockup
+
+FROM nginx:alpine
+
+# Copy custom nginx configuration for reverse proxy
+COPY design/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+
+# Run nginx in foreground mode (required in Docker)
+CMD ["nginx", "-g", "daemon off;"]

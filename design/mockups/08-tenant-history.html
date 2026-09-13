@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติบิล — ApartmentOAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ── Tenant portal shared shell ── */
+    body {
+      display: block;
+      min-height: 100vh;
+      background: #FFF8F3;
+    }
+
+    /* Top nav (same as dashboard — copied for standalone mockup) */
+    .tenant-topnav {
+      background: var(--color-neutral-800);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-6);
+      gap: var(--space-4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .topnav-logo { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; flex-shrink: 0; }
+    .topnav-logo-mark { width: 32px; height: 32px; background: var(--color-primary); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+    .topnav-logo-mark svg { width: 18px; height: 18px; fill: white; }
+    .topnav-brand { font-size: var(--text-sm); font-weight: 700; color: white; }
+    .topnav-room-chip { padding: 4px 12px; background: rgba(255,255,255,0.1); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.12); }
+    .topnav-links { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+    .topnav-link { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: rgba(255,255,255,0.6); font-size: var(--text-sm); font-weight: 500; transition: background-color var(--transition-fast), color var(--transition-fast); min-height: 40px; }
+    .topnav-link:hover { background-color: rgba(255,255,255,0.08); color: white; }
+    .topnav-link.active { background-color: rgba(255,255,255,0.12); color: white; font-weight: 600; }
+    .topnav-link svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.75; }
+    .topnav-logout { width: 36px; height: 36px; background: none; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-md); cursor: pointer; color: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; transition: background-color var(--transition-fast), color var(--transition-fast); margin-left: var(--space-2); }
+    .topnav-logout:hover { background: rgba(255,255,255,0.08); color: white; }
+    .topnav-logout:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .topnav-logout svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.75; }
+    @media (max-width: 560px) { .topnav-link-label { display: none; } .topnav-brand { display: none; } .topnav-room-chip { display: none; } }
+
+    /* ── Page ── */
+    .tenant-page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-5);
+    }
+
+    .page-heading {
+      margin-bottom: var(--space-6);
+    }
+
+    .page-heading h1 {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--color-neutral-900);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-1);
+    }
+
+    .page-heading p {
+      font-size: var(--text-sm);
+      color: var(--color-neutral-600);
+    }
+
+    /* ── Summary stats ── */
+    .history-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .history-stat {
+      background: var(--color-white);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .history-stat-value {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      line-height: var(--leading-tight);
+      color: var(--color-neutral-900);
+    }
+
+    .history-stat-value.success { color: var(--color-success); }
+    .history-stat-value.warning { color: var(--color-warning); }
+
+    .history-stat-label {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-neutral-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: var(--space-1);
+    }
+
+    /* ── Bill history list ── */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .history-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+    }
+
+    .history-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-neutral-300);
+    }
+
+    /* Clickable row — toggle meter details */
+    .history-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-card-header:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: -2px;
+    }
+
+    .history-month-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .history-month-badge-month {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-month-badge-year {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-primary);
+      opacity: 0.7;
+    }
+
+    .history-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-card-month {
+      font-size: var(--text-md);
+      font-weight: 700;
+      color: var(--color-neutral-900);
+      margin-bottom: 2px;
+    }
+
+    .history-card-sub {
+      font-size: var(--text-xs);
+      color: var(--color-neutral-400);
+    }
+
+    .history-card-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-shrink: 0;
+    }
+
+    .history-amount {
+      font-family: var(--font-mono);
+      font-size: var(--text-md);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-neutral-900);
+      text-align: right;
+    }
+
+    .history-chevron {
+      width: 20px;
+      height: 20px;
+      stroke: var(--color-neutral-400);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      transition: transform var(--transition-normal);
+      flex-shrink: 0;
+    }
+
+    .history-card.open .history-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Expandable meter detail */
+    .history-card-detail {
+      display: none;
+      border-top: 1px solid var(--color-neutral-100);
+    }
+
+    .history-card.open .history-card-detail {
+      display: block;
+    }
+
+    .meter-detail-section {
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-neutral-50);
+    }
+
+    .meter-detail-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-neutral-600);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+
+    .meter-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+
+    .meter-group {
+      background: var(--color-white);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .meter-group-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-2);
+    }
+
+    .meter-group.water .meter-group-title { color: #0284C7; }
+    .meter-group.elec  .meter-group-title { color: #D97706; }
+
+    .meter-reading-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--text-xs);
+      color: var(--color-neutral-600);
+      margin-bottom: 2px;
+    }
+
+    .meter-reading-row span:last-child {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-neutral-900);
+    }
+
+    .meter-usage-chip {
+      display: inline-block;
+      margin-top: var(--space-2);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .meter-group.water .meter-usage-chip { background: #E0F2FE; color: #0369A1; }
+    .meter-group.elec  .meter-usage-chip { background: #FEF3C7; color: #92400E; }
+
+    .detail-actions {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border-top: 1px solid var(--color-neutral-100);
+    }
+
+    /* ── Year filter ── */
+    .year-filter {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+
+    .year-filter-label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-neutral-700);
+      flex-shrink: 0;
+    }
+
+    .year-filter select {
+      width: auto;
+      height: 38px;
+      font-size: var(--text-sm);
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 480px) {
+      .tenant-page { padding: var(--space-5) var(--space-4); }
+      .history-stats { grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+      .history-stats .history-stat:last-child { grid-column: span 2; }
+      .meter-detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav -->
+  <nav class="tenant-topnav" role="navigation" aria-label="เมนูหลักผู้เช่า">
+    <a href="07-tenant-dashboard.html" class="topnav-logo">
+      <div class="topnav-logo-mark">
+        <svg viewBox="0 0 20 20"><path d="M10 1L2 8v11h5v-7h6v7h5V8L10 1z"/></svg>
+      </div>
+      <span class="topnav-brand">ApartmentOAT</span>
+    </a>
+    <span class="topnav-room-chip">ห้อง 201</span>
+    <div class="topnav-links">
+      <a href="07-tenant-dashboard.html" class="topnav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <span class="topnav-link-label">หน้าหลัก</span>
+      </a>
+      <a href="08-tenant-history.html" class="topnav-link active" aria-current="page">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+        <span class="topnav-link-label">ประวัติ</span>
+      </a>
+      <a href="09-tenant-payment.html" class="topnav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span class="topnav-link-label">แจ้งชำระ</span>
+      </a>
+      <button class="topnav-logout" aria-label="ออกจากระบบ" onclick="handleLogout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <main class="tenant-page" id="main-content">
+
+    <div class="page-heading">
+      <h1>ประวัติบิล</h1>
+      <p>ห้อง 201 · Building A · คลิกที่บิลเพื่อดูรายละเอียดมิเตอร์</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="history-stats" role="region" aria-label="สรุปประวัติการชำระ">
+      <div class="history-stat">
+        <div class="history-stat-value">12</div>
+        <div class="history-stat-label">บิลทั้งหมด</div>
+      </div>
+      <div class="history-stat">
+        <div class="history-stat-value success">11</div>
+        <div class="history-stat-label">ชำระแล้ว</div>
+      </div>
+      <div class="history-stat">
+        <div class="history-stat-value warning">1</div>
+        <div class="history-stat-label">ค้างชำระ</div>
+      </div>
+    </div>
+
+    <!-- Year filter -->
+    <div class="year-filter">
+      <label class="year-filter-label" for="yearSelect">ปี</label>
+      <select id="yearSelect" aria-label="เลือกปี" onchange="filterYear(this.value)">
+        <option value="2569">2569</option>
+        <option value="2568">2568</option>
+      </select>
+    </div>
+
+    <!-- Bill history list -->
+    <div class="history-list" role="list" aria-label="รายการบิลย้อนหลัง">
+
+      <!-- July 2569 — unpaid / current -->
+      <div class="history-card" role="listitem">
+        <div
+          class="history-card-header"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-controls="detail-202507"
+          onclick="toggleDetail(this)"
+          onkeydown="if(event.key==='Enter'||event.key===' '){toggleDetail(this)}"
+        >
+          <div class="history-month-badge">
+            <span class="history-month-badge-month">ก.ค.</span>
+            <span class="history-month-badge-year">2569</span>
+          </div>
+          <div class="history-card-info">
+            <div class="history-card-month">กรกฎาคม 2569</div>
+            <div class="history-card-sub">ครบกำหนด 25 ก.ค. 2569</div>
+          </div>
+          <div class="history-card-right">
+            <div>
+              <div class="history-amount">3,850 ฿</div>
+              <div style="text-align:right; margin-top:3px;"><span class="badge badge-unpaid">ค้างชำระ</span></div>
+            </div>
+            <svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="history-card-detail" id="detail-202507">
+          <div class="meter-detail-section">
+            <div class="meter-detail-title">มิเตอร์เดือนนี้</div>
+            <div class="meter-detail-grid">
+              <div class="meter-group water">
+                <div class="meter-group-title">น้ำประปา</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>1,245</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>1,270</span></div>
+                <span class="meter-usage-chip">ใช้ 25 หน่วย</span>
+              </div>
+              <div class="meter-group elec">
+                <div class="meter-group-title">ไฟฟ้า</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>8,410</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>8,450</span></div>
+                <span class="meter-usage-chip">ใช้ 40 หน่วย</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <a href="09-tenant-payment.html" class="btn btn-primary btn-sm">แจ้งชำระ</a>
+            <button class="btn btn-secondary btn-sm" onclick="downloadPDF('2569-07')">ดาวน์โหลด PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- June 2569 — paid -->
+      <div class="history-card" role="listitem">
+        <div
+          class="history-card-header"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-controls="detail-202506"
+          onclick="toggleDetail(this)"
+          onkeydown="if(event.key==='Enter'||event.key===' '){toggleDetail(this)}"
+        >
+          <div class="history-month-badge" style="background:#ECFDF5;">
+            <span class="history-month-badge-month" style="color:var(--color-success)">มิ.ย.</span>
+            <span class="history-month-badge-year" style="color:var(--color-success)">2569</span>
+          </div>
+          <div class="history-card-info">
+            <div class="history-card-month">มิถุนายน 2569</div>
+            <div class="history-card-sub">ชำระ 18 มิ.ย. 2569</div>
+          </div>
+          <div class="history-card-right">
+            <div>
+              <div class="history-amount">3,720 ฿</div>
+              <div style="text-align:right; margin-top:3px;"><span class="badge badge-paid">จ่ายแล้ว</span></div>
+            </div>
+            <svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="history-card-detail" id="detail-202506">
+          <div class="meter-detail-section">
+            <div class="meter-detail-title">มิเตอร์เดือนนี้</div>
+            <div class="meter-detail-grid">
+              <div class="meter-group water">
+                <div class="meter-group-title">น้ำประปา</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>1,223</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>1,245</span></div>
+                <span class="meter-usage-chip">ใช้ 22 หน่วย</span>
+              </div>
+              <div class="meter-group elec">
+                <div class="meter-group-title">ไฟฟ้า</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>8,374</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>8,410</span></div>
+                <span class="meter-usage-chip">ใช้ 36 หน่วย</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-secondary btn-sm" onclick="downloadPDF('2569-06')">ดาวน์โหลด PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- May 2569 — paid -->
+      <div class="history-card" role="listitem">
+        <div
+          class="history-card-header"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-controls="detail-202505"
+          onclick="toggleDetail(this)"
+          onkeydown="if(event.key==='Enter'||event.key===' '){toggleDetail(this)}"
+        >
+          <div class="history-month-badge" style="background:#ECFDF5;">
+            <span class="history-month-badge-month" style="color:var(--color-success)">พ.ค.</span>
+            <span class="history-month-badge-year" style="color:var(--color-success)">2569</span>
+          </div>
+          <div class="history-card-info">
+            <div class="history-card-month">พฤษภาคม 2569</div>
+            <div class="history-card-sub">ชำระ 15 พ.ค. 2569</div>
+          </div>
+          <div class="history-card-right">
+            <div>
+              <div class="history-amount">3,810 ฿</div>
+              <div style="text-align:right; margin-top:3px;"><span class="badge badge-paid">จ่ายแล้ว</span></div>
+            </div>
+            <svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="history-card-detail" id="detail-202505">
+          <div class="meter-detail-section">
+            <div class="meter-detail-title">มิเตอร์เดือนนี้</div>
+            <div class="meter-detail-grid">
+              <div class="meter-group water">
+                <div class="meter-group-title">น้ำประปา</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>1,198</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>1,223</span></div>
+                <span class="meter-usage-chip">ใช้ 25 หน่วย</span>
+              </div>
+              <div class="meter-group elec">
+                <div class="meter-group-title">ไฟฟ้า</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>8,326</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>8,374</span></div>
+                <span class="meter-usage-chip">ใช้ 48 หน่วย</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-secondary btn-sm" onclick="downloadPDF('2569-05')">ดาวน์โหลด PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- April 2569 — paid -->
+      <div class="history-card" role="listitem">
+        <div
+          class="history-card-header"
+          role="button"
+          tabindex="0"
+          aria-expanded="false"
+          aria-controls="detail-202504"
+          onclick="toggleDetail(this)"
+          onkeydown="if(event.key==='Enter'||event.key===' '){toggleDetail(this)}"
+        >
+          <div class="history-month-badge" style="background:#ECFDF5;">
+            <span class="history-month-badge-month" style="color:var(--color-success)">เม.ย.</span>
+            <span class="history-month-badge-year" style="color:var(--color-success)">2569</span>
+          </div>
+          <div class="history-card-info">
+            <div class="history-card-month">เมษายน 2569</div>
+            <div class="history-card-sub">ชำระ 22 เม.ย. 2569</div>
+          </div>
+          <div class="history-card-right">
+            <div>
+              <div class="history-amount">3,630 ฿</div>
+              <div style="text-align:right; margin-top:3px;"><span class="badge badge-paid">จ่ายแล้ว</span></div>
+            </div>
+            <svg class="history-chevron" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="history-card-detail" id="detail-202504">
+          <div class="meter-detail-section">
+            <div class="meter-detail-title">มิเตอร์เดือนนี้</div>
+            <div class="meter-detail-grid">
+              <div class="meter-group water">
+                <div class="meter-group-title">น้ำประปา</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>1,180</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>1,198</span></div>
+                <span class="meter-usage-chip">ใช้ 18 หน่วย</span>
+              </div>
+              <div class="meter-group elec">
+                <div class="meter-group-title">ไฟฟ้า</div>
+                <div class="meter-reading-row"><span>เดือนก่อน</span><span>8,296</span></div>
+                <div class="meter-reading-row"><span>เดือนนี้</span><span>8,326</span></div>
+                <span class="meter-usage-chip">ใช้ 30 หน่วย</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-secondary btn-sm" onclick="downloadPDF('2569-04')">ดาวน์โหลด PDF</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.history-list -->
+
+  </main>
+
+  <div class="toast toast-hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    function toggleDetail(header) {
+      const card = header.closest('.history-card');
+      const isOpen = card.classList.toggle('open');
+      header.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    function downloadPDF(period) {
+      showToast('กำลังสร้าง PDF บิล ' + period + '…');
+    }
+
+    function filterYear(year) {
+      showToast('โหลดบิลปี ' + year + '…');
+    }
+
+    function handleLogout() {
+      if (confirm('ต้องการออกจากระบบ?')) {
+        window.location.href = '06-login-tenant.html';
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('toast-hidden');
+      setTimeout(() => t.classList.add('toast-hidden'), 3000);
+    }
+  </script>
+</body>
+</html>

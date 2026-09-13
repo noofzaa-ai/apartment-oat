@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  apartment-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apartment-oat-app
+    ports:
+      - "3004:3000"
+    image: apartment-oat:latest
+    environment:
+      # Session security (MUST be at least 32 characters random string)
+      SESSION_PASSWORD: ${SESSION_PASSWORD:-change-me-to-at-least-32-character-random-string}
+
+      # Database (SQLite stored in volume)
+      DATABASE_URL: "file:/app/data/app.db"
+
+      # Optional: SMTP configuration for email notifications
+      # If not set, PIN will be logged to console instead
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+
+      # Optional: Custom Thai font path for PDF generation
+      # THAI_FONT_PATH: ${THAI_FONT_PATH:-/app/assets/fonts/Sarabun-Regular.ttf}
+
+      # Server listen configuration
+      HOSTNAME: ${HOSTNAME:-0.0.0.0}
+      PORT: ${PORT:-3000}
+
+    volumes:
+      # Persist SQLite database across container restarts
+      - app_data:/app/data
+
+      # Persist payment slips across container restarts
+      - app_uploads:/app/uploads
+
+    restart: unless-stopped
+
+volumes:
+  # SQLite database directory
+  app_data:
+    driver: local
+
+  # Payment slips upload directory
+  app_uploads:
+    driver: local

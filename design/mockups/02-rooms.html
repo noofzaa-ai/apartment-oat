@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้อง — ApartmentOAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ── Mobile Top Bar ── -->
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="เปิดเมนู">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="2" y1="6" x2="18" y2="6"/><line x1="2" y1="12" x2="18" y2="12"/><line x1="2" y1="18" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <span class="mobile-brand">ApartmentOAT</span>
+  </div>
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="เมนูหลัก">
+    <div class="sidebar-header">
+      <div class="sidebar-logo" aria-hidden="true">
+        <svg viewBox="0 0 20 20"><path d="M10 1L2 8v11h5v-7h6v7h5V8L10 1z"/></svg>
+      </div>
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">ApartmentOAT</span>
+        <span class="sidebar-brand-sub">ระบบจัดการหอพัก</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">เมนูหลัก</span>
+      <a href="01-locations.html" class="sidebar-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 9.75L12 3l9 6.75V21H3V9.75z"/><path d="M9 21V12h6v9"/></svg>
+        หอพัก
+      </a>
+      <a href="02-rooms.html" class="sidebar-item active" aria-current="page">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/>
+          <rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>
+        </svg>
+        ห้อง
+      </a>
+      <a href="03-meter-reading.html" class="sidebar-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        อ่านมิเตอร์
+      </a>
+      <a href="04-monthly-bills.html" class="sidebar-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+        </svg>
+        บิลรายเดือน
+      </a>
+    </nav>
+    <div class="sidebar-footer">v2.0 · ApartmentOAT</div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content">
+    <div class="page-container">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-breadcrumb">
+            <a href="01-locations.html">หอพัก</a>
+            <span class="page-breadcrumb-sep">›</span>
+            <span>Building A</span>
+          </div>
+          <h1 class="page-title">Building A — ห้องทั้งหมด</h1>
+          <p class="page-subtitle">10 ห้อง · มีผู้เช่า 8 ห้อง · ว่าง 2 ห้อง</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="window.location.href='01-locations.html'">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 3L4 8l6 5"/></svg>
+            กลับ
+          </button>
+          <button class="btn btn-primary" onclick="openAddRoomModal()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+            เพิ่มห้อง
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <div class="table-toolbar">
+          <div class="table-toolbar-left">
+            <span class="card-title">รายการห้อง</span>
+            <span class="table-count">5 ห้อง</span>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>เลขห้อง</th>
+              <th>ประเภท</th>
+              <th class="num">ค่าเช่าฐาน</th>
+              <th class="num">ค่าน้ำ/หน่วย</th>
+              <th class="num">ค่าไฟ/หน่วย</th>
+              <th>บริการเสริม</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="เลขห้อง"><span class="room-number">101</span></td>
+              <td data-label="ประเภท" style="color: var(--color-neutral-700);">Studio</td>
+              <td class="num-cell" data-label="ค่าเช่าฐาน">3,000 <span style="color:var(--color-neutral-400);font-family:var(--font-sans);font-size:var(--text-xs);">฿</span></td>
+              <td class="num-cell" data-label="ค่าน้ำ/หน่วย">15.00</td>
+              <td class="num-cell" data-label="ค่าไฟ/หน่วย">5.00</td>
+              <td data-label="บริการเสริม">
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  <span class="badge badge-tag">Wi-Fi 200฿</span>
+                  <span class="badge badge-tag">แอร์ 300฿</span>
+                </div>
+              </td>
+              <td data-label="">
+                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" onclick="openEditRoomModal('101')">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDeleteRoomModal('101')">ลบ</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td data-label="เลขห้อง"><span class="room-number">102</span></td>
+              <td data-label="ประเภท" style="color: var(--color-neutral-700);">1 Bedroom</td>
+              <td class="num-cell" data-label="ค่าเช่าฐาน">5,000 <span style="color:var(--color-neutral-400);font-family:var(--font-sans);font-size:var(--text-xs);">฿</span></td>
+              <td class="num-cell" data-label="ค่าน้ำ/หน่วย">15.00</td>
+              <td class="num-cell" data-label="ค่าไฟ/หน่วย">5.00</td>
+              <td data-label="บริการเสริม">
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  <span class="badge badge-tag">ที่จอด 500฿</span>
+                  <span class="badge badge-tag">Wi-Fi 200฿</span>
+                </div>
+              </td>
+              <td data-label="">
+                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" onclick="openEditRoomModal('102')">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDeleteRoomModal('102')">ลบ</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td data-label="เลขห้อง"><span class="room-number">103</span></td>
+              <td data-label="ประเภท" style="color: var(--color-neutral-700);">Studio</td>
+              <td class="num-cell" data-label="ค่าเช่าฐาน">3,000 <span style="color:var(--color-neutral-400);font-family:var(--font-sans);font-size:var(--text-xs);">฿</span></td>
+              <td class="num-cell" data-label="ค่าน้ำ/หน่วย">15.00</td>
+              <td class="num-cell" data-label="ค่าไฟ/หน่วย">5.00</td>
+              <td data-label="บริการเสริม"><span style="color:var(--color-neutral-400);font-size:var(--text-xs);">—</span></td>
+              <td data-label="">
+                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" onclick="openEditRoomModal('103')">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDeleteRoomModal('103')">ลบ</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td data-label="เลขห้อง"><span class="room-number">104</span></td>
+              <td data-label="ประเภท" style="color: var(--color-neutral-700);">2 Bedroom</td>
+              <td class="num-cell" data-label="ค่าเช่าฐาน">7,000 <span style="color:var(--color-neutral-400);font-family:var(--font-sans);font-size:var(--text-xs);">฿</span></td>
+              <td class="num-cell" data-label="ค่าน้ำ/หน่วย">15.00</td>
+              <td class="num-cell" data-label="ค่าไฟ/หน่วย">5.00</td>
+              <td data-label="บริการเสริม">
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  <span class="badge badge-tag">ที่จอด 500฿</span>
+                  <span class="badge badge-tag">แอร์ 300฿</span>
+                  <span class="badge badge-tag">Wi-Fi 300฿</span>
+                </div>
+              </td>
+              <td data-label="">
+                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" onclick="openEditRoomModal('104')">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDeleteRoomModal('104')">ลบ</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td data-label="เลขห้อง"><span class="room-number">105</span></td>
+              <td data-label="ประเภท" style="color: var(--color-neutral-700);">1 Bedroom</td>
+              <td class="num-cell" data-label="ค่าเช่าฐาน">5,000 <span style="color:var(--color-neutral-400);font-family:var(--font-sans);font-size:var(--text-xs);">฿</span></td>
+              <td class="num-cell" data-label="ค่าน้ำ/หน่วย">15.00</td>
+              <td class="num-cell" data-label="ค่าไฟ/หน่วย">5.00</td>
+              <td data-label="บริการเสริม">
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                  <span class="badge badge-tag">Wi-Fi 200฿</span>
+                </div>
+              </td>
+              <td data-label="">
+                <div style="display:flex;gap:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" onclick="openEditRoomModal('105')">แก้ไข</button>
+                  <button class="btn btn-danger btn-sm" onclick="openDeleteRoomModal('105')">ลบ</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div><!-- /table-wrapper -->
+
+    </div>
+  </main>
+</div>
+
+<!-- ── Add/Edit Room Modal ── -->
+<div class="modal-overlay" id="roomModal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2 class="modal-title" id="roomModalTitle">เพิ่มห้อง</h2>
+      <button class="modal-close" onclick="closeModal('roomModal')" aria-label="ปิด">
+        <svg viewBox="0 0 18 18"><line x1="2" y1="2" x2="16" y2="16"/><line x1="16" y1="2" x2="2" y2="16"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form class="form" id="roomForm" onsubmit="return false">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="roomNumber">เลขห้อง <span class="form-required">*</span></label>
+            <input type="text" id="roomNumber" placeholder="เช่น 101" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="roomType">ประเภทห้อง <span class="form-required">*</span></label>
+            <select id="roomType" required>
+              <option value="">— เลือกประเภท —</option>
+              <option value="studio">Studio</option>
+              <option value="1bed">1 Bedroom</option>
+              <option value="2bed">2 Bedroom</option>
+              <option value="3bed">3 Bedroom</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="baseRent">ค่าเช่าฐาน (บาท) <span class="form-required">*</span></label>
+          <input type="number" id="baseRent" placeholder="3000" min="0" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="waterRate">อัตราค่าน้ำ (บาท/หน่วย) <span class="form-required">*</span></label>
+            <input type="number" id="waterRate" placeholder="15.00" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="electricRate">อัตราค่าไฟ (บาท/หน่วย) <span class="form-required">*</span></label>
+            <input type="number" id="electricRate" placeholder="5.00" step="0.01" min="0" required>
+          </div>
+        </div>
+
+        <!-- Room Options -->
+        <div class="form-group">
+          <label class="form-label">บริการเสริม (เลือกได้หลายรายการ)</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item" for="optParking">
+              <input type="checkbox" id="optParking" onchange="toggleOptionPrice('parking')">
+              <span class="checkbox-item-label">ที่จอดรถ</span>
+              <span class="checkbox-item-price" id="parkingPriceTag">— ฿</span>
+            </label>
+            <div class="form-group hidden" id="parkingPriceGroup" style="padding-left: var(--space-8);">
+              <label class="form-label" for="parkingPrice" style="font-size:var(--text-xs);">ราคาที่จอด (บาท/เดือน)</label>
+              <input type="number" id="parkingPrice" placeholder="500" min="0">
+            </div>
+
+            <label class="checkbox-item" for="optAC">
+              <input type="checkbox" id="optAC" onchange="toggleOptionPrice('ac')">
+              <span class="checkbox-item-label">เครื่องปรับอากาศ (แอร์)</span>
+              <span class="checkbox-item-price" id="acPriceTag">— ฿</span>
+            </label>
+            <div class="form-group hidden" id="acPriceGroup" style="padding-left: var(--space-8);">
+              <label class="form-label" for="acPrice" style="font-size:var(--text-xs);">ราคาแอร์ (บาท/เดือน)</label>
+              <input type="number" id="acPrice" placeholder="300" min="0">
+            </div>
+
+            <label class="checkbox-item" for="optWifi">
+              <input type="checkbox" id="optWifi" onchange="toggleOptionPrice('wifi')">
+              <span class="checkbox-item-label">อินเตอร์เน็ต (Wi-Fi)</span>
+              <span class="checkbox-item-price" id="wifiPriceTag">— ฿</span>
+            </label>
+            <div class="form-group hidden" id="wifiPriceGroup" style="padding-left: var(--space-8);">
+              <label class="form-label" for="wifiPrice" style="font-size:var(--text-xs);">ราคา Wi-Fi (บาท/เดือน)</label>
+              <input type="number" id="wifiPrice" placeholder="200" min="0">
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('roomModal')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveRoom()">บันทึกห้อง</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Confirm Modal ── -->
+<div class="modal-overlay" id="deleteRoomModal" role="alertdialog" aria-modal="true">
+  <div class="modal modal-narrow">
+    <div class="modal-header">
+      <h2 class="modal-title">ลบห้อง</h2>
+      <button class="modal-close" onclick="closeModal('deleteRoomModal')" aria-label="ปิด">
+        <svg viewBox="0 0 18 18"><line x1="2" y1="2" x2="16" y2="16"/><line x1="16" y1="2" x2="2" y2="16"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="delete-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </div>
+      <p style="font-size:var(--text-md);font-weight:600;margin-bottom:var(--space-2);">ลบห้อง "<span id="deleteRoomTarget"></span>"?</p>
+      <p style="font-size:var(--text-sm);color:var(--color-neutral-600);">ประวัติบิลของห้องนี้จะยังคงอยู่ แต่ข้อมูลห้องจะถูกลบถาวร</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('deleteRoomModal')">ยกเลิก</button>
+      <button class="btn btn-danger" style="background:var(--color-error);color:white;border-color:var(--color-error);" onclick="confirmDeleteRoom()">ลบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast toast-success toast-hidden" id="toast">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 16 16"><polyline points="2 9 6 13 14 4"/></svg>
+  <span id="toastMsg">บันทึกสำเร็จ</span>
+</div>
+
+<script>
+  function toggleMobileMenu() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('mobileOverlay').classList.toggle('open');
+  }
+  function closeMobileMenu() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('mobileOverlay').classList.remove('open');
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  function openAddRoomModal() {
+    document.getElementById('roomModalTitle').textContent = 'เพิ่มห้อง';
+    document.getElementById('roomNumber').value = '';
+    document.getElementById('roomNumber').disabled = false;
+    document.getElementById('roomType').value = '';
+    document.getElementById('baseRent').value = '';
+    document.getElementById('waterRate').value = '';
+    document.getElementById('electricRate').value = '';
+    openModal('roomModal');
+    setTimeout(() => document.getElementById('roomNumber').focus(), 50);
+  }
+
+  function openEditRoomModal(num) {
+    document.getElementById('roomModalTitle').textContent = 'แก้ไขห้อง ' + num;
+    document.getElementById('roomNumber').value = num;
+    document.getElementById('roomNumber').disabled = true;
+    document.getElementById('baseRent').value = num === '101' ? 3000 : num === '102' ? 5000 : 3000;
+    document.getElementById('waterRate').value = 15;
+    document.getElementById('electricRate').value = 5;
+    openModal('roomModal');
+    setTimeout(() => document.getElementById('baseRent').focus(), 50);
+  }
+
+  function openDeleteRoomModal(num) {
+    document.getElementById('deleteRoomTarget').textContent = num;
+    openModal('deleteRoomModal');
+  }
+
+  function toggleOptionPrice(key) {
+    const checked = document.getElementById(`opt${key.charAt(0).toUpperCase()+key.slice(1)}`).checked;
+    document.getElementById(`${key}PriceGroup`).classList.toggle('hidden', !checked);
+    const val = document.getElementById(`${key}Price`)?.value;
+    document.getElementById(`${key}PriceTag`).textContent = (checked && val) ? `${val} ฿` : '— ฿';
+  }
+
+  function saveRoom() {
+    const num = document.getElementById('roomNumber').value.trim();
+    if (!num) { document.getElementById('roomNumber').focus(); return; }
+    closeModal('roomModal');
+    showToast('บันทึกห้องสำเร็จ');
+  }
+
+  function confirmDeleteRoom() {
+    closeModal('deleteRoomModal');
+    showToast('ลบห้องสำเร็จ');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.remove('toast-hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.add('toast-hidden'), 3000);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+</script>
+</body>
+</html>

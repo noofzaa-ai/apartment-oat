@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
     const session = await getSession();
     audit("callback.txn_missing", { hasSession: Boolean(session.userId) });
     if (session.userId) {
-      const res = NextResponse.redirect(new URL("/app/(dashboard)/locations", publicBaseUrl()).href);
+      const res = NextResponse.redirect(new URL("/app/locations", publicBaseUrl()).href);
       res.cookies.delete(TXN_COOKIE);
       return res;
     }

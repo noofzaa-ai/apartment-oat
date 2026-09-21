@@ -197,7 +197,7 @@ function PresetsContent({ params }: { params: Promise<{ id: string }> }) {
       <div style={{ marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, fontSize: "0.9375rem", fontWeight: 600, color: "#64748B" }}>
-            <Link href="/app/(dashboard)/locations" style={{ color: "#64748B", textDecoration: "none" }}>หอพัก</Link>
+            <Link href="/app/locations" style={{ color: "#64748B", textDecoration: "none" }}>หอพัก</Link>
             <span>›</span>
             <span>{apartment?.name || "..."}</span>
             <span>›</span>

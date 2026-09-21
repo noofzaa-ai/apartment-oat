@@ -25,5 +25,11 @@ export async function GET() {
     orderBy: { sortOrder: "asc" },
   });
 
-  return NextResponse.json(plans);
+  // Parse features from JSON string to array
+  const parsedPlans = plans.map(p => ({
+    ...p,
+    features: JSON.parse(p.features as string),
+  }));
+
+  return NextResponse.json(parsedPlans);
 }

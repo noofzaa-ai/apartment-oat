@@ -130,14 +130,14 @@ export default function GetStartedPage() {
   const handleSubmitInvite = async () => {
     setInviteError('');
     
-    if (!inviteCode || inviteCode.length !== 6) {
-      setInviteError('กรุณากรอกรหัสเชิญ 6 ตัวอักษร');
+    if (!inviteCode || inviteCode.length !== 8) {
+      setInviteError('กรุณากรอกรหัสเชิญ 8 ตัวอักษร');
       return;
     }
 
     setSubmittingInvite(true);
     try {
-      const res = await fetch(`/api/tenant/invites/${inviteCode.toUpperCase()}/claim`, {
+      const res = await fetch(`/api/tenant/invites/${inviteCode}/claim`, {
         method: 'POST',
       });
 
@@ -577,7 +577,7 @@ export default function GetStartedPage() {
                 ใช้รหัสเชิญ
               </h2>
               <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#2C3E50" }}>
-                กรอกรหัสเชิญ 6 ตัวอักษรที่คุณได้รับ
+                กรอกรหัสเชิญ 8 ตัวอักษรที่คุณได้รับ
               </p>
             </div>
 
@@ -587,12 +587,12 @@ export default function GetStartedPage() {
                 type="text"
                 value={inviteCode}
                 onChange={(e) => {
-                  const value = e.target.value.toUpperCase().slice(0, 6);
+                  const value = e.target.value.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 8);
                   setInviteCode(value);
                   setInviteError('');
                 }}
-                maxLength={6}
-                placeholder="ABC123"
+                maxLength={8}
+                placeholder="zn3quM-C"
                 style={{
                   width: "100%",
                   border: "4px solid #2C3E50",
@@ -634,21 +634,21 @@ export default function GetStartedPage() {
             {/* Submit Button */}
             <button
               onClick={handleSubmitInvite}
-              disabled={submittingInvite || inviteCode.length !== 6}
+              disabled={submittingInvite || inviteCode.length !== 8}
               style={{
                 width: "100%",
                 border: "4px solid #2C3E50",
                 borderRadius: 16,
-                background: submittingInvite || inviteCode.length !== 6 ? "#CBD5E1" : "#7FDB9A",
+                background: submittingInvite || inviteCode.length !== 8 ? "#CBD5E1" : "#7FDB9A",
                 padding: "16px 24px",
                 fontWeight: 900,
                 fontSize: "1.125rem",
                 color: "#2C3E50",
-                cursor: submittingInvite || inviteCode.length !== 6 ? "not-allowed" : "pointer",
+                cursor: submittingInvite || inviteCode.length !== 8 ? "not-allowed" : "pointer",
                 transition: "transform 0.2s"
               }}
               onMouseEnter={(e) => {
-                if (!submittingInvite && inviteCode.length === 6) {
+                if (!submittingInvite && inviteCode.length === 8) {
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }
               }}

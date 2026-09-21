@@ -77,7 +77,7 @@ export default function AppSidebar() {
       .then((data) => {
         if (active && data?.authenticated && data.user) {
           setUser({ displayName: data.user.displayName, email: data.user.email });
-          setIsTenant(!!data.user.isTenant);
+          setIsTenant(!!(data.user.isTenant || data.user.canViewTenantMode));
         }
       })
       .catch(() => {

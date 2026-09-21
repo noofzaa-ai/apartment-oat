@@ -235,7 +235,7 @@ export default function TenantDashboardPage() {
                     ทดลองใช้ฟรี 30 วัน! จัดการห้อง ออกบิล รับสลิปชำระเงิน ครบทุกฟีเจอร์
                   </p>
                   <Link
-                    href="/app/locations"
+                    href="/app/(dashboard)/locations"
                     style={{
                       display: "inline-flex",
                       alignItems: "center",

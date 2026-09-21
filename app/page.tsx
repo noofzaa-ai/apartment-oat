@@ -29,7 +29,7 @@ export default async function Home() {
             <a href="#for-who">สำหรับใคร</a>
           </nav>
           <form action="/auth/login" method="get" style={{ display: "contents" }}>
-            <input type="hidden" name="return_to" value="/app/locations" />
+            <input type="hidden" name="return_to" value="/app/(dashboard)/locations" />
             <button type="submit" className="header-cta" style={{ border: 0 }}>เข้าสู่ระบบ <span aria-hidden="true">↗</span></button>
           </form>
           <LandingClient />
@@ -115,7 +115,7 @@ export default async function Home() {
         </section>
 
         <section className="closing section" aria-labelledby="closing-title">
-          <div className="container closing-inner reveal"><div className="closing-spark" aria-hidden="true">✦</div><p className="section-kicker">APARTMENTS BY DAIYOOO</p><h2 id="closing-title">เรื่องหอพัก<br /><em>จัดการให้ได้อยู่</em></h2><p>ให้เวลาของคุณกลับไปอยู่กับการดูแลหอพัก แทนการไล่ตามบิลทีละห้อง</p><form action="/auth/login" method="get" style={{ display: "contents" }}><input type="hidden" name="return_to" value="/app/locations" /><button type="submit" className="button button-dark" style={{ border: 0 }}>เข้าสู่ระบบ <span aria-hidden="true">↗</span></button></form>{/* eslint-disable-next-line @next/next/no-img-element */}<img className="closing-mascot" src="/landing/oatty-hero.png" width={300} height={300} loading="lazy" alt="" aria-hidden="true" /></div>
+          <div className="container closing-inner reveal"><div className="closing-spark" aria-hidden="true">✦</div><p className="section-kicker">APARTMENTS BY DAIYOOO</p><h2 id="closing-title">เรื่องหอพัก<br /><em>จัดการให้ได้อยู่</em></h2><p>ให้เวลาของคุณกลับไปอยู่กับการดูแลหอพัก แทนการไล่ตามบิลทีละห้อง</p><form action="/auth/login" method="get" style={{ display: "contents" }}><input type="hidden" name="return_to" value="/app/(dashboard)/locations" /><button type="submit" className="button button-dark" style={{ border: 0 }}>เข้าสู่ระบบ <span aria-hidden="true">↗</span></button></form>{/* eslint-disable-next-line @next/next/no-img-element */}<img className="closing-mascot" src="/landing/oatty-hero.png" width={300} height={300} loading="lazy" alt="" aria-hidden="true" /></div>
         </section>
       </main>
 

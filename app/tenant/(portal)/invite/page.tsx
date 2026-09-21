@@ -175,7 +175,7 @@ export default function TenantInvitePage() {
             หรือ
           </p>
           <a
-            href="/app/locations"
+            href="/app/(dashboard)/locations"
             style={{
               display: "inline-flex",
               alignItems: "center",

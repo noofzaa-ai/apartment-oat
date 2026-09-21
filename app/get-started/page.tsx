@@ -109,7 +109,7 @@ export default function GetStartedPage() {
       setToast({ message: "เริ่มทดลองใช้งานสำเร็จ! กำลังพาคุณเข้าสู่ระบบ...", type: "success" });
       
       setTimeout(() => {
-        router.push("/app/locations");
+        router.push("/app/(dashboard)/locations");
       }, 1000);
     } catch (e: unknown) {
       setToast({ 

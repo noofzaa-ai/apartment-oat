@@ -48,7 +48,7 @@ function subscriptionIsActive(sub: {
  * Resolve post-login destination by subscription state.
  *
  * Product routing rule (2026-09):
- *   • Active owner subscription  → /app/locations
+ *   • Active owner subscription  → /app/(dashboard)/locations
  *   • No subscription (new user) → /get-started (onboarding)
  *   • Tenant with room           → /tenant/dashboard
  *   • Everything else            → /tenant/dashboard
@@ -94,7 +94,7 @@ export async function resolvePostLoginPath(
     return "/get-started";
   }
 
-  return isOwner ? "/app/locations" : "/tenant/dashboard";
+  return isOwner ? "/app/(dashboard)/locations" : "/tenant/dashboard";
 }
 
 /**

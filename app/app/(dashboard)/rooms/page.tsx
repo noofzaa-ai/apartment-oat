@@ -238,7 +238,7 @@ function RoomsContent() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "0.875rem", color: "#2C3E50", fontWeight: 600 }}>
-            <Link href="/app/locations" style={{ color: "#2C3E50", textDecoration: "none" }}>🏢 หอพัก</Link>
+            <Link href="/app/(dashboard)/locations" style={{ color: "#2C3E50", textDecoration: "none" }}>🏢 หอพัก</Link>
             <span>›</span>
             <span>{selectedLocation?.name || "ห้อง"}</span>
           </div>
@@ -335,7 +335,7 @@ function RoomsContent() {
             กรุณาเลือกหอพักก่อน
           </p>
           <Link
-            href="/app/locations"
+            href="/app/(dashboard)/locations"
             style={{
               padding: "14px 28px",
               borderRadius: 16,

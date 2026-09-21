@@ -1,16 +1,14 @@
 import { defineConfig } from "vitest/config";
-import path from "node:path";
+import path from "path";
 
-// Minimal, self-contained vitest config — scoped to lib/auth.ts logic tests only.
-// node environment (no DOM needed); @/ alias mirrors tsconfig paths.
 export default defineConfig({
   test: {
+    globals: true,
     environment: "node",
-    include: ["tests/**/*.test.ts"],
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "."),
+      "@": path.resolve(__dirname, "./"),
     },
   },
 });

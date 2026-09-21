@@ -68,6 +68,10 @@ export default function GetStartedPage() {
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [inviteError, setInviteError] = useState('');
+  const [submittingInvite, setSubmittingInvite] = useState(false);
 
   useEffect(() => {
     loadPlans();
@@ -121,6 +125,35 @@ export default function GetStartedPage() {
       message: "กรุณาติดต่อทีมงานเพื่อเปิดใช้งาน หรือเริ่มด้วย Trial ก่อน", 
       type: "success" 
     });
+  };
+
+  const handleSubmitInvite = async () => {
+    setInviteError('');
+    
+    if (!inviteCode || inviteCode.length !== 6) {
+      setInviteError('กรุณากรอกรหัสเชิญ 6 ตัวอักษร');
+      return;
+    }
+
+    setSubmittingInvite(true);
+    try {
+      const res = await fetch(`/api/tenant/invites/${inviteCode.toUpperCase()}/claim`, {
+        method: 'POST',
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'ไม่สามารถใช้รหัสเชิญได้');
+      }
+
+      setToast({ message: 'ใช้รหัสเชิญสำเร็จ! กำลังพาคุณเข้าสู่ระบบ...', type: 'success' });
+      setTimeout(() => {
+        router.push('/tenant/dashboard');
+      }, 1000);
+    } catch (e: unknown) {
+      setInviteError(e instanceof Error ? e.message : 'เกิดข้อผิดพลาด');
+      setSubmittingInvite(false);
+    }
   };
 
   if (loading) {
@@ -227,7 +260,7 @@ export default function GetStartedPage() {
             </p>
           </div>
           <button
-            onClick={() => router.push("/tenant/invite")}
+            onClick={() => setShowInviteModal(true)}
             style={{
               border: "4px solid #2C3E50",
               borderRadius: 24,
@@ -470,6 +503,164 @@ export default function GetStartedPage() {
           </div>
         </div>
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(44, 62, 80, 0.8)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 50,
+          padding: 16
+        }}
+        onClick={() => {
+          setShowInviteModal(false);
+          setInviteCode('');
+          setInviteError('');
+        }}
+        >
+          <div
+            style={{
+              border: "4px solid #2C3E50",
+              borderRadius: 24,
+              background: "#FFFFFF",
+              padding: 32,
+              maxWidth: 480,
+              width: "100%",
+              position: "relative"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowInviteModal(false);
+                setInviteCode('');
+                setInviteError('');
+              }}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 16,
+                border: "3px solid #2C3E50",
+                borderRadius: 12,
+                background: "#FFB3BA",
+                width: 40,
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontWeight: 900,
+                fontSize: "1.25rem",
+                color: "#2C3E50"
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Modal Title */}
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <div style={{ fontSize: "3rem", marginBottom: 12 }}>🎟️</div>
+              <h2 style={{
+                fontSize: "1.75rem",
+                fontWeight: 900,
+                color: "#2C3E50",
+                marginBottom: 8
+              }}>
+                ใช้รหัสเชิญ
+              </h2>
+              <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#2C3E50" }}>
+                กรอกรหัสเชิญ 6 ตัวอักษรที่คุณได้รับ
+              </p>
+            </div>
+
+            {/* Input Field */}
+            <div style={{ marginBottom: 16 }}>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase().slice(0, 6);
+                  setInviteCode(value);
+                  setInviteError('');
+                }}
+                maxLength={6}
+                placeholder="ABC123"
+                style={{
+                  width: "100%",
+                  border: "4px solid #2C3E50",
+                  borderRadius: 16,
+                  padding: "16px 20px",
+                  fontSize: "1.5rem",
+                  fontWeight: 900,
+                  textAlign: "center",
+                  color: "#2C3E50",
+                  background: "#F8F9FA",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase"
+                }}
+                autoFocus
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !submittingInvite) {
+                    handleSubmitInvite();
+                  }
+                }}
+              />
+            </div>
+
+            {/* Error Message */}
+            {inviteError && (
+              <div style={{
+                border: "3px solid #2C3E50",
+                borderRadius: 16,
+                background: "#FFD93D",
+                padding: "12px 16px",
+                marginBottom: 16,
+                textAlign: "center"
+              }}>
+                <p style={{ fontSize: "0.875rem", fontWeight: 700, color: "#2C3E50" }}>
+                  ⚠️ {inviteError}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmitInvite}
+              disabled={submittingInvite || inviteCode.length !== 6}
+              style={{
+                width: "100%",
+                border: "4px solid #2C3E50",
+                borderRadius: 16,
+                background: submittingInvite || inviteCode.length !== 6 ? "#CBD5E1" : "#7FDB9A",
+                padding: "16px 24px",
+                fontWeight: 900,
+                fontSize: "1.125rem",
+                color: "#2C3E50",
+                cursor: submittingInvite || inviteCode.length !== 6 ? "not-allowed" : "pointer",
+                transition: "transform 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                if (!submittingInvite && inviteCode.length === 6) {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              {submittingInvite ? "กำลังตรวจสอบ..." : "ยืนยันรหัสเชิญ"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

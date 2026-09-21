@@ -227,7 +227,7 @@ export default function GetStartedPage() {
             </p>
           </div>
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/tenant/invite")}
             style={{
               border: "4px solid #2C3E50",
               borderRadius: 24,
@@ -238,11 +238,16 @@ export default function GetStartedPage() {
               fontSize: "1.125rem",
               cursor: "pointer",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: 8
+              gap: 4
             }}
+            title="หากคุณได้รับรหัสเชิญจากเจ้าของหอพัก กดที่นี่"
           >
-            🏠 เข้าสู่ระบบผู้เช่า
+            <span>🎟️ ใช้รหัสเชิญ</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 600 }}>
+              มีรหัสเชิญจากเจ้าของหอพัก?
+            </span>
           </button>
         </div>
       </div>

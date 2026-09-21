@@ -62,7 +62,7 @@ export default function AdminSubscriptionsPage() {
 
         const userRole = data.user?.role;
         if (userRole !== "PLATFORM_ADMIN" && userRole !== "SUPER_ADMIN") {
-          router.replace("/app");
+          router.replace("/get-started");
           return;
         }
 

@@ -130,14 +130,25 @@ export default function GetStartedPage() {
   const handleSubmitInvite = async () => {
     setInviteError('');
     
-    if (!inviteCode || inviteCode.length !== 8) {
-      setInviteError('กรุณากรอกรหัสเชิญ 8 ตัวอักษร');
+    let code = inviteCode.trim();
+    
+    // If input contains URL pattern, extract code
+    if (code.includes('/tenant/invite/')) {
+      const match = code.match(/\/tenant\/invite\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        code = match[1];
+      }
+    }
+    
+    // Validate extracted code
+    if (!code || code.length !== 8) {
+      setInviteError('รหัสเชิญไม่ถูกต้อง (ต้องเป็น 8 ตัวอักษร)');
       return;
     }
 
     setSubmittingInvite(true);
     try {
-      const res = await fetch(`/api/tenant/invites/${inviteCode}/claim`, {
+      const res = await fetch(`/api/tenant/invites/${code}/claim`, {
         method: 'POST',
       });
 
@@ -577,7 +588,7 @@ export default function GetStartedPage() {
                 ใช้รหัสเชิญ
               </h2>
               <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "#2C3E50" }}>
-                กรอกรหัสเชิญ 8 ตัวอักษรที่คุณได้รับ
+                วางรหัสเชิญ (8 ตัวอักษร) หรือ URL เต็มที่นี่
               </p>
             </div>
 
@@ -587,28 +598,24 @@ export default function GetStartedPage() {
                 type="text"
                 value={inviteCode}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 8);
-                  setInviteCode(value);
+                  setInviteCode(e.target.value);
                   setInviteError('');
                 }}
-                maxLength={8}
-                placeholder="zn3quM-C"
+                placeholder="วางรหัสเชิญหรือ URL ที่นี่"
                 style={{
                   width: "100%",
                   border: "4px solid #2C3E50",
                   borderRadius: 16,
                   padding: "16px 20px",
-                  fontSize: "1.5rem",
-                  fontWeight: 900,
+                  fontSize: "1.125rem",
+                  fontWeight: 700,
                   textAlign: "center",
                   color: "#2C3E50",
-                  background: "#F8F9FA",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase"
+                  background: "#F8F9FA"
                 }}
                 autoFocus
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !submittingInvite) {
+                  if (e.key === 'Enter' && !submittingInvite && inviteCode.trim().length > 0) {
                     handleSubmitInvite();
                   }
                 }}
@@ -634,21 +641,21 @@ export default function GetStartedPage() {
             {/* Submit Button */}
             <button
               onClick={handleSubmitInvite}
-              disabled={submittingInvite || inviteCode.length !== 8}
+              disabled={submittingInvite || inviteCode.trim().length === 0}
               style={{
                 width: "100%",
                 border: "4px solid #2C3E50",
                 borderRadius: 16,
-                background: submittingInvite || inviteCode.length !== 8 ? "#CBD5E1" : "#7FDB9A",
+                background: submittingInvite || inviteCode.trim().length === 0 ? "#CBD5E1" : "#7FDB9A",
                 padding: "16px 24px",
                 fontWeight: 900,
                 fontSize: "1.125rem",
                 color: "#2C3E50",
-                cursor: submittingInvite || inviteCode.length !== 8 ? "not-allowed" : "pointer",
+                cursor: submittingInvite || inviteCode.trim().length === 0 ? "not-allowed" : "pointer",
                 transition: "transform 0.2s"
               }}
               onMouseEnter={(e) => {
-                if (!submittingInvite && inviteCode.length === 8) {
+                if (!submittingInvite && inviteCode.trim().length > 0) {
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }
               }}

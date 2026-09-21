@@ -1,89 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, unauthorized } from "@/lib/auth";
+import { requireUserId, isAuthResponse } from "@/lib/auth";
 
-export async function GET(req: NextRequest) {
-  if (!(await requireAdmin())) return unauthorized();
-  const { searchParams } = new URL(req.url);
-  const locationId = searchParams.get("locationId");
-  const period = searchParams.get("period"); // YYYY-MM
+export const runtime = "nodejs";
 
-  if (!period) {
-    return NextResponse.json({ error: "period required" }, { status: 400 });
-  }
-
-  // Compute previous period
+function previousPeriod(period: string) {
   const [year, month] = period.split("-").map(Number);
   const prevDate = new Date(year, month - 2, 1);
-  const prevPeriod = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
+  return `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
+}
+function mapRoom(room: any) { return { ...room, locationId: room.apartmentId, location: room.Apartment }; }
 
-  // Get rooms for this location
+export async function GET(req: NextRequest) {
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
+  const locationId = req.nextUrl.searchParams.get("locationId");
+  const period = req.nextUrl.searchParams.get("period");
+  if (!period) return NextResponse.json({ error: "period required" }, { status: 400 });
+  const prevPeriod = previousPeriod(period);
   const rooms = await prisma.room.findMany({
-    where: locationId ? { locationId: Number(locationId) } : undefined,
-    include: {
-      options: true,
-      location: { select: { name: true } },
-    },
+    where: locationId ? { apartmentId: Number(locationId), Apartment: { ownerUserId: userId } } : { Apartment: { ownerUserId: userId } },
+    include: { options: true, Apartment: { select: { id: true, name: true } } },
     orderBy: { roomNumber: "asc" },
   });
-
-  // Get current readings
-  const currentReadings = await prisma.meterReading.findMany({
-    where: {
-      roomId: { in: rooms.map((r) => r.id) },
-      period,
-    },
-  });
-
-  // Get previous readings
-  const prevReadings = await prisma.meterReading.findMany({
-    where: {
-      roomId: { in: rooms.map((r) => r.id) },
-      period: prevPeriod,
-    },
-  });
-
+  const roomIds = rooms.map((r) => r.id);
+  const [currentReadings, prevReadings] = await Promise.all([
+    prisma.meterReading.findMany({ where: { roomId: { in: roomIds }, period } }),
+    prisma.meterReading.findMany({ where: { roomId: { in: roomIds }, period: prevPeriod } }),
+  ]);
   const currentMap = new Map(currentReadings.map((r) => [r.roomId, r]));
   const prevMap = new Map(prevReadings.map((r) => [r.roomId, r]));
-
-  const result = rooms.map((room) => ({
-    room,
-    current: currentMap.get(room.id) || null,
-    previous: prevMap.get(room.id) || null,
-    prevPeriod,
-  }));
-
-  return NextResponse.json(result);
+  return NextResponse.json(rooms.map((room) => ({ room: mapRoom(room), current: currentMap.get(room.id) || null, previous: prevMap.get(room.id) || null, prevPeriod })));
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin())) return unauthorized();
-  const body = await req.json();
-  const { period, readings } = body;
-  // readings: [{ roomId, waterReading, electricReading }]
-
-  if (!period || !Array.isArray(readings)) {
-    return NextResponse.json({ error: "ข้อมูลไม่ครบถ้วน" }, { status: 400 });
-  }
-
-  const saved = [];
-  for (const r of readings) {
-    if (r.waterReading == null || r.electricReading == null) continue;
-    const result = await prisma.meterReading.upsert({
-      where: { roomId_period: { roomId: Number(r.roomId), period } },
-      create: {
-        roomId: Number(r.roomId),
-        period,
-        waterReading: Number(r.waterReading),
-        electricReading: Number(r.electricReading),
-      },
-      update: {
-        waterReading: Number(r.waterReading),
-        electricReading: Number(r.electricReading),
-      },
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
+  const { period, readings } = await req.json();
+  if (!period || !Array.isArray(readings)) return NextResponse.json({ error: "ข้อมูลไม่ครบถ้วน" }, { status: 400 });
+  const roomIds = readings.map((r: { roomId: number }) => Number(r.roomId)).filter(Number.isFinite);
+  const rooms = await prisma.room.findMany({ where: { id: { in: roomIds }, Apartment: { ownerUserId: userId } }, select: { id: true } });
+  const allowed = new Set(rooms.map((r) => r.id));
+  let saved = 0;
+  for (const r of readings as { roomId: number; waterReading: number; electricReading: number }[]) {
+    const roomId = Number(r.roomId);
+    if (!allowed.has(roomId) || r.waterReading == null || r.electricReading == null) continue;
+    await prisma.meterReading.upsert({
+      where: { roomId_period: { roomId, period } },
+      create: { roomId, period, waterReading: Number(r.waterReading), electricReading: Number(r.electricReading) },
+      update: { waterReading: Number(r.waterReading), electricReading: Number(r.electricReading) },
     });
-    saved.push(result);
+    saved++;
   }
-
-  return NextResponse.json({ saved: saved.length });
+  return NextResponse.json({ saved });
 }

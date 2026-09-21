@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  apartment-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apartment-oat-app
+    ports:
+      - "3004:3000"
+    image: apartment-oat:latest
+    environment:
+      SESSION_PASSWORD: ${SESSION_PASSWORD:?set SESSION_PASSWORD random string >=32 chars}
+      DATABASE_URL: "file:/app/data/app.db"
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      DAIYOOO_OIDC_ISSUER: ${DAIYOOO_OIDC_ISSUER:-https://account.daiyooo.com/api/auth}
+      DAIYOOO_OIDC_DISCOVERY_URL: ${DAIYOOO_OIDC_DISCOVERY_URL:-https://account.daiyooo.com/.well-known/openid-configuration}
+      DAIYOOO_OIDC_CLIENT_ID: ${DAIYOOO_OIDC_CLIENT_ID:-apartments}
+      DAIYOOO_OIDC_REDIRECT_URI: ${DAIYOOO_OIDC_REDIRECT_URI:-https://apartments.daiyooo.com/auth/callback}
+      DAIYOOO_OIDC_SCOPES: ${DAIYOOO_OIDC_SCOPES:-openid profile email}
+      DAIYOOO_OIDC_PROMPT: ${DAIYOOO_OIDC_PROMPT:-}
+      PRODUCT_BASE_URL: ${PRODUCT_BASE_URL:-https://apartments.daiyooo.com}
+      THAI_FONT_PATH: ${THAI_FONT_PATH:-/app/assets/fonts/Sarabun-Regular.ttf}
+      HOSTNAME: ${HOSTNAME:-0.0.0.0}
+      PORT: ${PORT:-3000}
+    volumes:
+      # Mount K3s database directly via NFS or local path
+      - /mnt/k3s-apartment-oat/data:/app/data
+      - /mnt/k3s-apartment-oat/uploads:/app/uploads
+    restart: unless-stopped

@@ -127,20 +127,50 @@ export default function AdminTenantsPage() {
     } finally { setBusy(false); }
   };
 
-  if (loading) return <><div className="page-header"><h1 className="page-title">ผู้เช่า</h1></div><div className="loading">กำลังโหลด...</div></>;
+  if (loading) return <><div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}><h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", margin: 0, display: "flex", alignItems: "center", gap: 12 }}><span style={{ fontSize: "3rem" }}>👥</span>ผู้เช่า</h1></div><div style={{ textAlign: "center", padding: 64, fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>กำลังโหลด...</div></>;
 
   return (
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      <div className="page-header">
-        <div><h1 className="page-title">ผู้เช่า</h1><p style={{ color: "var(--color-text-secondary)", marginTop: 4 }}>เชิญผู้เช่าด้วยลิงก์ และตรวจสลิปชำระเงิน</p></div>
-        <button className="btn btn-primary" onClick={() => setActiveTab("invites")}>+ สร้างลิงก์เชิญ</button>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
+        <div>
+          <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "3rem" }}>👥</span>
+            ผู้เช่า
+          </h1>
+          <p style={{ color: "#64748B", marginTop: 8, fontSize: "0.95rem", fontWeight: 600 }}>เชิญผู้เช่าด้วยลิงก์ และตรวจสลิปชำระเงิน</p>
+        </div>
+        <button
+          style={{
+            padding: "14px 28px",
+            borderRadius: 16,
+            fontSize: "1rem",
+            fontWeight: 900,
+            background: "#7FDB9A",
+            border: "4px solid #2C3E50",
+            color: "#2C3E50",
+            cursor: "pointer",
+          }}
+          onClick={() => setActiveTab("invites")}
+        >
+          + สร้างลิงก์เชิญ
+        </button>
       </div>
 
-      <div className="summary-cards" style={{ marginBottom: 24 }}>
-        <div className="summary-card"><div className="summary-card-label">ผู้เช่าทั้งหมด</div><div className="summary-card-value">{tenants.length}</div></div>
-        <div className="summary-card"><div className="summary-card-label">ลิงก์ยังใช้ได้</div><div className="summary-card-value">{invites.filter((i) => i.status === "ACTIVE").length}</div></div>
-        <div className="summary-card"><div className="summary-card-label">สลิปรอยืนยัน</div><div className="summary-card-value" style={{ color: slips.length ? "var(--color-error)" : undefined }}>{slips.length}</div></div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 24 }}>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+          <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ผู้เช่าทั้งหมด</div>
+          <div style={{ fontSize: "2.25rem", fontWeight: 900, color: "#2C3E50" }}>{tenants.length}</div>
+        </div>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+          <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ลิงก์ยังใช้ได้</div>
+          <div style={{ fontSize: "2.25rem", fontWeight: 900, color: "#2C3E50" }}>{invites.filter((i) => i.status === "ACTIVE").length}</div>
+        </div>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+          <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>สลิปรอยืนยัน</div>
+          <div style={{ fontSize: "2.25rem", fontWeight: 900, color: slips.length ? "#EF4444" : "#2C3E50" }}>{slips.length}</div>
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }} role="tablist">
@@ -149,25 +179,40 @@ export default function AdminTenantsPage() {
         <Tab active={activeTab === "slips"} onClick={() => setActiveTab("slips")}>สลิปรอยืนยัน {slips.length ? `(${slips.length})` : ""}</Tab>
       </div>
 
-      {activeTab === "tenants" && <div className="table-container"><table><thead><tr><th>ผู้เช่า</th><th>ห้อง</th><th>หอพัก</th><th>สถานะบิล</th><th style={{ textAlign: "right" }}>จัดการ</th></tr></thead><tbody>{tenants.length === 0 ? <tr><td colSpan={5} style={{ textAlign: "center", padding: 32, color: "var(--color-text-secondary)" }}>ยังไม่มีผู้เช่า — สร้างลิงก์เชิญเพื่อเริ่มต้น</td></tr> : tenants.map((t) => <tr key={t.id}><td><strong>{t.name}</strong><div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>{t.email}</div></td><td>{t.room?.roomNumber ?? "—"}</td><td>{t.room?.location.name ?? "—"}</td><td>{t.latestBillStatus === "PAID" ? <span className="badge badge-success">จ่ายแล้ว</span> : t.latestBillStatus === "SUBMITTED" ? <span className="badge badge-info">รอยืนยัน</span> : t.latestBillStatus === "UNPAID" ? <span className="badge badge-warning">ค้างชำระ</span> : "—"}</td><td style={{ textAlign: "right" }}><button className="btn btn-sm btn-danger" onClick={() => removeTenant(t)}>ยกเลิกสิทธิ์</button></td></tr>)}</tbody></table></div>}
+      {activeTab === "tenants" && <div className="table-container"><table><thead><tr><th>ผู้เช่า</th><th>ห้อง</th><th>หอพัก</th><th>สถานะบิล</th><th style={{ textAlign: "right" }}>จัดการ</th></tr></thead><tbody>{tenants.length === 0 ? <tr><td colSpan={5} style={{ textAlign: "center", padding: 32, color: "#64748B" }}>ยังไม่มีผู้เช่า — สร้างลิงก์เชิญเพื่อเริ่มต้น</td></tr> : tenants.map((t) => <tr key={t.id}><td><strong>{t.name}</strong><div style={{ fontSize: 12, color: "#64748B" }}>{t.email}</div></td><td>{t.room?.roomNumber ?? "—"}</td><td>{t.room?.location.name ?? "—"}</td><td>{t.latestBillStatus === "PAID" ? <span className="badge badge-success">จ่ายแล้ว</span> : t.latestBillStatus === "SUBMITTED" ? <span className="badge badge-info">รอยืนยัน</span> : t.latestBillStatus === "UNPAID" ? <span className="badge badge-warning">ค้างชำระ</span> : "—"}</td><td style={{ textAlign: "right" }}><button style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: "#FFD93D", border: "3px solid #2C3E50", color: "#2C3E50", cursor: "pointer" }} onClick={() => removeTenant(t)}>ยกเลิกสิทธิ์</button></td></tr>)}</tbody></table></div>}
 
       {activeTab === "invites" && <div style={{ display: "grid", gap: 20 }}>
-        <div style={{ background: "white", border: "1px solid var(--color-border)", borderRadius: "var(--border-radius)", padding: 20 }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>สร้างลิงก์เชิญผู้เช่า</h2>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 20, padding: 24 }}>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "#2C3E50", marginBottom: 16 }}>สร้างลิงก์เชิญผู้เช่า</h2>
           <div className="form-row"><div className="form-group"><label>หอพัก</label><select value={selectedLocationId} onChange={(e) => { setSelectedLocationId(e.target.value); setSelectedRoomId(""); }}><option value="">-- เลือกหอพัก --</option>{locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}</select></div><div className="form-group"><label>ห้องว่าง</label><select value={selectedRoomId} onChange={(e) => setSelectedRoomId(e.target.value)}><option value="">-- เลือกห้อง --</option>{availableRooms.map((r) => <option key={r.id} value={r.id}>ห้อง {r.roomNumber}{r.roomType ? ` (${r.roomType})` : ""}</option>)}</select></div></div>
-          <button className="btn btn-primary" disabled={busy || !selectedRoomId} onClick={createInvite}>{busy ? "กำลังสร้าง..." : "สร้างลิงก์เชิญ"}</button>
-          {generatedLink && <div style={{ marginTop: 16, padding: 12, background: "var(--color-bg-lighter)", borderRadius: 8, wordBreak: "break-all" }}><strong>ลิงก์ล่าสุด:</strong> {generatedLink} <button className="btn btn-sm btn-secondary" onClick={() => copy(generatedLink)} style={{ marginLeft: 8 }}>คัดลอก</button></div>}
+          <button
+            style={{
+              padding: "12px 24px",
+              borderRadius: 12,
+              fontSize: "0.95rem",
+              fontWeight: 900,
+              background: busy || !selectedRoomId ? "#CBD5E1" : "#7FDB9A",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              cursor: busy || !selectedRoomId ? "not-allowed" : "pointer",
+            }}
+            disabled={busy || !selectedRoomId}
+            onClick={createInvite}
+          >
+            {busy ? "กำลังสร้าง..." : "สร้างลิงก์เชิญ"}
+          </button>
+          {generatedLink && <div style={{ marginTop: 16, padding: 16, background: "#FFF8F0", border: "3px solid #2C3E50", borderRadius: 12, wordBreak: "break-all" }}><strong style={{ fontWeight: 900 }}>ลิงก์ล่าสุด:</strong> {generatedLink} <button style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: "#B8D8E8", border: "3px solid #2C3E50", color: "#2C3E50", cursor: "pointer", marginLeft: 8 }} onClick={() => copy(generatedLink)}>คัดลอก</button></div>}
         </div>
-        <div className="table-container"><table><thead><tr><th>ห้อง</th><th>รหัส</th><th>สถานะ</th><th>หมดอายุ</th><th>ลิงก์</th></tr></thead><tbody>{invites.length === 0 ? <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>ยังไม่มีลิงก์</td></tr> : invites.map((i) => <tr key={i.id}><td>{i.room.roomNumber}</td><td style={{ fontFamily: "monospace" }}>{i.code}</td><td>{i.status === "ACTIVE" ? <span className="badge badge-success">ใช้ได้</span> : i.status === "USED" ? <span className="badge badge-info">ใช้แล้ว</span> : <span className="badge badge-warning">หมดอายุ</span>}</td><td>{new Date(i.expiresAt).toLocaleDateString("th-TH")}</td><td><button className="btn btn-sm btn-secondary" onClick={() => copy(i.url)}>คัดลอก</button></td></tr>)}</tbody></table></div>
+        <div className="table-container"><table><thead><tr><th>ห้อง</th><th>รหัส</th><th>สถานะ</th><th>หมดอายุ</th><th>ลิงก์</th></tr></thead><tbody>{invites.length === 0 ? <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>ยังไม่มีลิงก์</td></tr> : invites.map((i) => <tr key={i.id}><td>{i.room.roomNumber}</td><td style={{ fontFamily: "monospace" }}>{i.code}</td><td>{i.status === "ACTIVE" ? <span className="badge badge-success">ใช้ได้</span> : i.status === "USED" ? <span className="badge badge-info">ใช้แล้ว</span> : <span className="badge badge-warning">หมดอายุ</span>}</td><td>{new Date(i.expiresAt).toLocaleDateString("th-TH")}</td><td><button style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: "#B8D8E8", border: "3px solid #2C3E50", color: "#2C3E50", cursor: "pointer" }} onClick={() => copy(i.url)}>คัดลอก</button></td></tr>)}</tbody></table></div>
       </div>}
 
-      {activeTab === "slips" && <div className="table-container"><table><thead><tr><th>ผู้เช่า</th><th>ห้อง</th><th>เดือน</th><th>ยอด</th><th>สลิป</th><th style={{ textAlign: "right" }}>จัดการ</th></tr></thead><tbody>{slips.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 32, color: "var(--color-text-secondary)" }}>ไม่มีสลิปรอยืนยัน</td></tr> : slips.map((s) => <tr key={s.id}><td><strong>{s.room.tenant?.name ?? "—"}</strong><div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>{s.room.tenant?.email}</div></td><td>{s.room.location.name} / {s.room.roomNumber}</td><td>{thaiPeriod(s.period)}</td><td>{fmt(s.total)}</td><td>{s.paymentSlipUrl ? <a className="btn btn-sm btn-secondary" href={s.paymentSlipUrl} target="_blank">ดูสลิป</a> : "—"}</td><td style={{ textAlign: "right" }}><button className="btn btn-sm btn-success" disabled={busy} onClick={() => slipAction(s, "approve")}>อนุมัติ</button> <button className="btn btn-sm btn-danger" disabled={busy} onClick={() => setRejectTarget(s)}>ปฏิเสธ</button></td></tr>)}</tbody></table></div>}
+      {activeTab === "slips" && <div className="table-container"><table><thead><tr><th>ผู้เช่า</th><th>ห้อง</th><th>เดือน</th><th>ยอด</th><th>สลิป</th><th style={{ textAlign: "right" }}>จัดการ</th></tr></thead><tbody>{slips.length === 0 ? <tr><td colSpan={6} style={{ textAlign: "center", padding: 32, color: "#64748B" }}>ไม่มีสลิปรอยืนยัน</td></tr> : slips.map((s) => <tr key={s.id}><td><strong>{s.room.tenant?.name ?? "—"}</strong><div style={{ fontSize: 12, color: "#64748B" }}>{s.room.tenant?.email}</div></td><td>{s.room.location.name} / {s.room.roomNumber}</td><td>{thaiPeriod(s.period)}</td><td>{fmt(s.total)}</td><td>{s.paymentSlipUrl ? <a style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: "#B8D8E8", border: "3px solid #2C3E50", color: "#2C3E50", textDecoration: "none", display: "inline-block" }} href={s.paymentSlipUrl} target="_blank">ดูสลิป</a> : "—"}</td><td style={{ textAlign: "right", display: "flex", gap: 6, justifyContent: "flex-end" }}><button style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: busy ? "#CBD5E1" : "#7FDB9A", border: "3px solid #2C3E50", color: "#2C3E50", cursor: busy ? "not-allowed" : "pointer" }} disabled={busy} onClick={() => slipAction(s, "approve")}>อนุมัติ</button> <button style={{ padding: "8px 16px", borderRadius: 8, fontSize: "0.875rem", fontWeight: 700, background: busy ? "#CBD5E1" : "#FFD93D", border: "3px solid #2C3E50", color: "#2C3E50", cursor: busy ? "not-allowed" : "pointer" }} disabled={busy} onClick={() => setRejectTarget(s)}>ปฏิเสธ</button></td></tr>)}</tbody></table></div>}
 
-      {rejectTarget && <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setRejectTarget(null)}><div className="modal" style={{ maxWidth: 440 }}><div className="modal-header"><h2 className="modal-title">ปฏิเสธสลิป</h2><button className="modal-close" onClick={() => setRejectTarget(null)}>✕</button></div><div className="modal-body"><div className="form-group"><label>เหตุผล</label><textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} style={{ width: "100%" }} /></div></div><div className="modal-footer"><button className="btn btn-secondary" onClick={() => setRejectTarget(null)}>ยกเลิก</button><button className="btn btn-danger" disabled={busy || !rejectReason.trim()} onClick={() => slipAction(rejectTarget, "reject")}>ยืนยัน</button></div></div></div>}
+      {rejectTarget && <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setRejectTarget(null)}><div className="modal" style={{ maxWidth: 440 }}><div className="modal-header"><h2 className="modal-title">ปฏิเสธสลิป</h2><button className="modal-close" onClick={() => setRejectTarget(null)}>✕</button></div><div className="modal-body"><div className="form-group"><label>เหตุผล</label><textarea rows={3} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} style={{ width: "100%" }} /></div></div><div className="modal-footer"><button style={{ padding: "12px 24px", borderRadius: 12, fontSize: "0.95rem", fontWeight: 900, background: "#FFFFFF", border: "4px solid #2C3E50", color: "#2C3E50", cursor: "pointer" }} onClick={() => setRejectTarget(null)}>ยกเลิก</button><button style={{ padding: "12px 24px", borderRadius: 12, fontSize: "0.95rem", fontWeight: 900, background: busy || !rejectReason.trim() ? "#CBD5E1" : "#FFD93D", border: "4px solid #2C3E50", color: "#2C3E50", cursor: busy || !rejectReason.trim() ? "not-allowed" : "pointer" }} disabled={busy || !rejectReason.trim()} onClick={() => slipAction(rejectTarget, "reject")}>ยืนยัน</button></div></div></div>}
     </>
   );
 }
 
 function Tab({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button role="tab" aria-selected={active} onClick={onClick} style={{ padding: "8px 16px", borderRadius: 9999, border: `1.5px solid ${active ? "var(--color-primary)" : "var(--color-border)"}`, background: active ? "var(--color-primary)" : "white", color: active ? "white" : "var(--color-text-secondary)", fontWeight: 700, cursor: "pointer" }}>{children}</button>;
+  return <button role="tab" aria-selected={active} onClick={onClick} style={{ padding: "10px 20px", borderRadius: 12, border: `3px solid ${active ? "#2C3E50" : "#2C3E50"}`, background: active ? "#FFD93D" : "#FFFFFF", color: "#2C3E50", fontWeight: 900, cursor: "pointer", fontSize: "0.95rem" }}>{children}</button>;
 }

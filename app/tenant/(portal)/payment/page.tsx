@@ -128,30 +128,27 @@ export default function TenantPaymentPage() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <main style={{ maxWidth: 720, margin: "0 auto", padding: "48px 20px" }} id="main-content">
+      <main style={{ maxWidth: 760, margin: "0 auto", padding: "56px 20px" }} id="main-content">
 
         {/* Page heading */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em", marginBottom: 4 }}>
+        <div style={{ marginBottom: 40 }}>
+          <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", marginBottom: 8, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "3rem" }}>💰</span>
             แจ้งชำระเงิน
           </h1>
-          <p style={{ fontSize: "0.8125rem", color: "#475569" }}>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", marginTop: 8, fontWeight: 700 }}>
             {room ? `ห้อง ${room.roomNumber} · ${room.location.name}` : ""}
           </p>
         </div>
 
         {!room ? (
-          <div style={{ background: "white", border: "1px solid #E2E8F0", borderRadius: 12, padding: 48, textAlign: "center", color: "#475569" }}>
+          <div style={{ background: "linear-gradient(135deg, #ffffff 0%, #fefcfb 100%)", border: "none", borderRadius: 24, padding: 56, textAlign: "center", color: "#475569", boxShadow: "0 8px 32px rgba(15,23,42,0.08)" }}>
+            <div style={{ fontSize: "3rem", marginBottom: 16 }}>🏠</div>
             ยังไม่ได้ผูกห้อง กรุณาติดต่อผู้ดูแลระบบ
           </div>
         ) : pendingBills.length === 0 ? (
-          <div style={{ background: "white", border: "1px solid #E2E8F0", borderRadius: 12, padding: 48, textAlign: "center", color: "#475569" }}>
-            <div style={{ fontSize: "2.5rem", marginBottom: 16 }}>
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#059669" strokeWidth="1.5" style={{ margin: "0 auto" }}>
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
+          <div style={{ background: "linear-gradient(135deg, #ffffff 0%, #ECFDF5 100%)", border: "none", borderRadius: 24, padding: 56, textAlign: "center", color: "#475569", boxShadow: "0 8px 32px rgba(5,150,105,0.12)" }}>
+            <div style={{ fontSize: "3.5rem", marginBottom: 20 }}>💰</div>
             <p style={{ fontSize: "1rem", fontWeight: 600, color: "#059669", marginBottom: 8 }}>ไม่มีบิลค้างชำระ</p>
             <p style={{ fontSize: "0.875rem" }}>บิลทั้งหมดชำระครบแล้ว</p>
           </div>
@@ -159,14 +156,23 @@ export default function TenantPaymentPage() {
           <>
             {/* Bill selector */}
             <div style={{
-              background: "white", border: "1px solid #E2E8F0",
-              borderRadius: 16, boxShadow: "0 1px 3px rgba(15,23,42,0.08)",
-              marginBottom: 20, overflow: "hidden",
+              background: "#FFFFFF", 
+              border: "4px solid #2C3E50",
+              borderRadius: 24, 
+              marginBottom: 28, 
+              overflow: "hidden",
             }}>
               <div style={{
-                padding: "16px 20px", borderBottom: "1px solid #F1F5F9",
-                fontSize: "0.8125rem", fontWeight: 700, color: "#0F172A",
+                padding: "20px 24px", 
+                borderBottom: "3px solid #2C3E50",
+                fontSize: "1rem", 
+                fontWeight: 900, 
+                color: "#2C3E50", 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 10,
               }}>
+                <span style={{ fontSize: "2rem" }}>📊</span>
                 เลือกบิลที่ต้องการแจ้งชำระ
               </div>
 
@@ -179,10 +185,10 @@ export default function TenantPaymentPage() {
                   <label
                     key={bill.id}
                     style={{
-                      display: "flex", alignItems: "center", gap: 16,
-                      padding: "16px 20px", cursor: "pointer",
-                      borderBottom: "1px solid #F1F5F9",
-                      background: isSelected ? "#F5F7FF" : "transparent",
+                      display: "flex", alignItems: "center", gap: 18,
+                      padding: "20px 24px", cursor: "pointer",
+                      borderBottom: "2px solid #E5E7EB",
+                      background: isSelected ? "#B8D8E8" : "transparent",
                       transition: "background 120ms",
                     }}
                   >
@@ -192,45 +198,45 @@ export default function TenantPaymentPage() {
                       value={bill.id}
                       checked={isSelected}
                       onChange={() => setSelectedBillId(bill.id)}
-                      style={{ width: 20, height: 20, accentColor: "#2D5BE3" }}
+                      style={{ width: 24, height: 24, accentColor: "#2C3E50" }}
                       disabled={isThisSubmitted}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: "0.9375rem", color: "#0F172A" }}>
+                      <div style={{ fontWeight: 800, fontSize: "1.125rem", color: "#2C3E50" }}>
                         {thaiPeriod(bill.period)}
                       </div>
                       {wasRejected && (
-                        <div style={{ fontSize: "0.75rem", color: "#DC2626", marginTop: 3 }}>
+                        <div style={{ fontSize: "0.875rem", color: "#DC2626", marginTop: 3, fontWeight: 700 }}>
                           ถูกปฏิเสธ: {bill.paymentRejectionReason}
                         </div>
                       )}
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <div style={{
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: "1rem",
-                        fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "#0F172A",
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: "1.25rem",
+                        fontWeight: 900, fontVariantNumeric: "tabular-nums", color: "#2C3E50",
                       }}>
                         {fmt(bill.total)} ฿
                       </div>
-                      <div style={{ marginTop: 4 }}>
+                      <div style={{ marginTop: 6 }}>
                         {isThisSubmitted ? (
                           <span style={{
-                            display: "inline-flex", alignItems: "center", gap: 5,
-                            padding: "3px 10px", borderRadius: 9999,
-                            fontSize: "0.75rem", fontWeight: 600,
-                            background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8",
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            padding: "6px 14px", borderRadius: 16,
+                            fontSize: "0.875rem", fontWeight: 800,
+                            background: "#B8D8E8", border: "3px solid #2C3E50", color: "#2C3E50",
                           }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2563EB" }} />
+                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2C3E50" }} />
                             รอยืนยัน
                           </span>
                         ) : (
                           <span style={{
-                            display: "inline-flex", alignItems: "center", gap: 5,
-                            padding: "3px 10px", borderRadius: 9999,
-                            fontSize: "0.75rem", fontWeight: 600,
-                            background: "#FFFBEB", border: "1px solid #FDE68A", color: "#D97706",
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            padding: "6px 14px", borderRadius: 16,
+                            fontSize: "0.875rem", fontWeight: 800,
+                            background: "#FFD93D", border: "3px solid #2C3E50", color: "#2C3E50",
                           }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#D97706" }} />
+                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2C3E50" }} />
                             ค้างชำระ
                           </span>
                         )}
@@ -244,27 +250,31 @@ export default function TenantPaymentPage() {
             {/* Upload form — only show when non-submitted bill is selected */}
             {selectedBill && !isSubmitted && (
               <div style={{
-                background: "white", border: "1px solid #E2E8F0",
-                borderRadius: 16, boxShadow: "0 1px 3px rgba(15,23,42,0.08)",
+                background: "#FFFFFF", 
+                border: "4px solid #2C3E50",
+                borderRadius: 24, 
                 overflow: "hidden",
               }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid #F1F5F9", fontSize: "0.8125rem", fontWeight: 700, color: "#0F172A" }}>
+                <div style={{ padding: "20px 24px", borderBottom: "3px solid #2C3E50", fontSize: "1rem", fontWeight: 900, color: "#2C3E50", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: "2rem" }}>💰</span>
                   อัปโหลดหลักฐานการชำระ
                 </div>
 
-                <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+                <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: 24 }}>
 
                   {/* File drop zone */}
                   <div>
-                    <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#0F172A", marginBottom: 8 }}>
+                    <div style={{ fontSize: "1rem", fontWeight: 800, color: "#2C3E50", marginBottom: 12 }}>
                       สลิปการชำระ <span style={{ color: "#DC2626" }}>*</span>
                     </div>
                     <label
                       style={{
                         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                        padding: "32px 24px", border: `2px dashed ${file ? "#2D5BE3" : "#CBD5E1"}`,
-                        borderRadius: 12, cursor: "pointer",
-                        background: file ? "#F5F7FF" : "#F8FAFC",
+                        padding: "32px 24px", 
+                        border: `4px dashed ${file ? "#7FDB9A" : "#2C3E50"}`,
+                        borderRadius: 20, 
+                        cursor: "pointer",
+                        background: file ? "#ECFDF5" : "#FFF8F0",
                         transition: "border-color 150ms, background 150ms",
                         gap: 12,
                       }}
@@ -290,10 +300,10 @@ export default function TenantPaymentPage() {
                         </svg>
                       )}
                       <div style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "0.875rem", fontWeight: 600, color: file ? "#2D5BE3" : "#475569" }}>
+                        <div style={{ fontSize: "1rem", fontWeight: 800, color: "#2C3E50" }}>
                           {file ? file.name : "คลิกเพื่อเลือกไฟล์"}
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#94A3B8", marginTop: 2 }}>
+                        <div style={{ fontSize: "0.875rem", color: "#2C3E50", marginTop: 4, fontWeight: 600 }}>
                           รองรับ JPG, PNG, WebP, GIF, PDF — ขนาดสูงสุด 10 MB
                         </div>
                       </div>
@@ -302,7 +312,7 @@ export default function TenantPaymentPage() {
 
                   {/* Note */}
                   <div>
-                    <label style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#0F172A", marginBottom: 8, display: "block" }}>
+                    <label style={{ fontSize: "1rem", fontWeight: 800, color: "#2C3E50", marginBottom: 12, display: "block" }}>
                       หมายเหตุเพิ่มเติม (ไม่จำเป็น)
                     </label>
                     <textarea
@@ -311,19 +321,38 @@ export default function TenantPaymentPage() {
                       placeholder="เช่น โอนผ่านธนาคาร X เวลา 10:30 น."
                       rows={3}
                       style={{
-                        width: "100%", padding: "10px 14px",
-                        border: "1px solid #CBD5E1", borderRadius: 8,
-                        fontSize: "0.875rem", color: "#0F172A",
-                        resize: "vertical", outline: "none",
+                        width: "100%", 
+                        padding: "14px 16px",
+                        border: "3px solid #2C3E50", 
+                        borderRadius: 16,
+                        fontSize: "1rem", 
+                        color: "#2C3E50",
+                        fontWeight: 600,
+                        resize: "vertical", 
+                        outline: "none",
                         boxSizing: "border-box",
+                        background: "#FFF8F0",
                       }}
                     />
                   </div>
 
                   {/* Submit */}
                   <button
-                    className="btn btn-primary"
-                    style={{ height: 52, fontSize: "1rem", fontWeight: 700 }}
+                    style={{ 
+                      width: "100%",
+                      height: 64, 
+                      fontSize: "1.125rem", 
+                      fontWeight: 900, 
+                      borderRadius: 20,
+                      background: submitting || !file ? "#CBD5E1" : "#7FDB9A",
+                      border: "4px solid #2C3E50",
+                      color: "#2C3E50",
+                      cursor: submitting || !file ? "not-allowed" : "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 10,
+                    }}
                     onClick={handleSubmit}
                     disabled={submitting || !file}
                   >
@@ -331,7 +360,7 @@ export default function TenantPaymentPage() {
                       "กำลังส่ง..."
                     ) : (
                       <>
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                           <path d="M22 2L11 13" /><path d="M22 2L15 22 11 13 2 9l20-7z" />
                         </svg>
                         ส่งหลักฐานการชำระ
@@ -345,16 +374,12 @@ export default function TenantPaymentPage() {
             {/* Already submitted notice */}
             {selectedBill && isSubmitted && (
               <div style={{
-                background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 12,
-                padding: "20px 24px", display: "flex", alignItems: "flex-start", gap: 12,
+                background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "none", borderRadius: 20,
+                padding: "24px 28px", display: "flex", alignItems: "flex-start", gap: 16, boxShadow: "0 6px 24px rgba(29,78,216,0.12)",
               }}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1D4ED8" strokeWidth="2" style={{ flexShrink: 0, marginTop: 2 }}>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+                <span style={{ fontSize: "2rem", flexShrink: 0 }}>📝</span>
                 <div>
-                  <div style={{ fontWeight: 700, color: "#1D4ED8", marginBottom: 4 }}>สลิปส่งแล้ว — รอแอดมินยืนยัน</div>
+                  <div style={{ fontWeight: 700, color: "#1D4ED8", marginBottom: 6, fontSize: "1.0625rem" }}>สลิปส่งแล้ว — รอแอดมินยืนยัน</div>
                   <div style={{ fontSize: "0.875rem", color: "#1E40AF" }}>
                     ระบบกำลังตรวจสอบสลิปของคุณ กรุณารอการยืนยันจากผู้ดูแล
                   </div>

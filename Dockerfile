@@ -11,7 +11,7 @@ WORKDIR /app
 # Install build dependencies for better-sqlite3 and pdfkit
 # bookworm includes python3, build-essential by default
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 build-essential \
+    python3 build-essential openssl \
     libcairo2-dev libjpeg62-turbo-dev libpango1.0-dev libgif-dev libpixman-1-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,7 +35,7 @@ WORKDIR /app
 
 # Install only runtime dependencies (for pdfkit, cairo rendering, and healthcheck)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcairo2 libjpeg62-turbo libpango1.0-0 libgif7 libpixman-1-0 wget \
+    libcairo2 libjpeg62-turbo libpango1.0-0 libgif7 libpixman-1-0 wget openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy entire node_modules from builder (with all native bindings already built)
@@ -45,6 +45,11 @@ COPY --from=builder /app/package*.json ./
 
 # Copy Prisma schema for runtime migrations
 COPY prisma ./prisma
+
+# Copy Prisma config (Prisma 7: datasource.url is defined here, not in schema.prisma)
+# Required by `prisma db push` in the entrypoint — without it, db push fails with
+# "The datasource.url property is required in your Prisma config file".
+COPY prisma.config.ts ./prisma.config.ts
 
 # Copy next.js build output (with standalone output)
 COPY --from=builder /app/.next/standalone ./

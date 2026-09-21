@@ -1,64 +1,37 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getCurrentUserId, getTenantMembership } from "@/lib/auth";
 
-// GET /api/tenant/bills — returns all bills for the session tenant's room
-// Security: roomId is sourced from session.userId → tenant.roomId, never from client
+export const runtime = "nodejs";
+
+function previousPeriod(period: string) {
+  const [y, m] = period.split("-").map(Number);
+  const prevDate = new Date(y, m - 2, 1);
+  return `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
+}
+function roomForUi(room: any) { return { ...room, location: room.Apartment }; }
+
 export async function GET() {
-  const session = await getSession();
-  if (!session.userId || session.role !== "tenant") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const userId = await getCurrentUserId();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const membership = await getTenantMembership(userId);
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, displayName: true, email: true } });
+  const tenant = { id: userId, name: user?.displayName ?? user?.email ?? "ผู้เช่า", email: user?.email ?? "" };
+  if (!membership?.roomId || !membership.Room) return NextResponse.json([]);
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: session.userId },
-    include: {
-      room: {
-        include: {
-          location: { select: { id: true, name: true } },
-        },
-      },
-    },
-  });
-
-  if (!tenant) {
-    return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
-  }
-
-  if (!tenant.roomId || !tenant.room) {
-    return NextResponse.json({ tenant: { id: tenant.id, name: tenant.name }, room: null, bills: [] });
-  }
-
-  // Filter strictly by session-derived roomId
   const bills = await prisma.bill.findMany({
-    where: { roomId: tenant.roomId },
+    where: { roomId: membership.roomId },
     orderBy: { period: "desc" },
     include: { lineItems: true },
   });
+  const billsWithMeters = await Promise.all(bills.map(async (bill) => {
+    const prevPeriod = previousPeriod(bill.period);
+    const [currReading, prevReading] = await Promise.all([
+      prisma.meterReading.findUnique({ where: { roomId_period: { roomId: membership.roomId!, period: bill.period } } }),
+      prisma.meterReading.findUnique({ where: { roomId_period: { roomId: membership.roomId!, period: prevPeriod } } }),
+    ]);
+    return { ...bill, currReading, prevReading };
+  }));
 
-  // For each bill, find the meter readings for that period and the previous period
-  const billsWithMeters = await Promise.all(
-    bills.map(async (bill) => {
-      const [y, m] = bill.period.split("-").map(Number);
-      const prevDate = new Date(y, m - 2, 1);
-      const prevPeriod = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
-
-      const [currReading, prevReading] = await Promise.all([
-        prisma.meterReading.findUnique({
-          where: { roomId_period: { roomId: tenant.roomId!, period: bill.period } },
-        }),
-        prisma.meterReading.findUnique({
-          where: { roomId_period: { roomId: tenant.roomId!, period: prevPeriod } },
-        }),
-      ]);
-
-      return { ...bill, currReading, prevReading };
-    })
-  );
-
-  return NextResponse.json({
-    tenant: { id: tenant.id, name: tenant.name },
-    room: tenant.room,
-    bills: billsWithMeters,
-  });
+  return NextResponse.json({ tenant, room: roomForUi(membership.Room), bills: billsWithMeters });
 }

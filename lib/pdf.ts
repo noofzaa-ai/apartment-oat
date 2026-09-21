@@ -64,7 +64,7 @@ export function generateBillPdf(data: BillPdfData): Promise<Buffer> {
       margins: { top: 50, bottom: 50, left: 60, right: 60 },
       info: {
         Title: `บิล ${data.roomNumber} ${thaiMonth(data.period)}`,
-        Author: "ApartmentOAT",
+        Author: "ระบบจัดการหอพัก",
       },
     });
 
@@ -98,7 +98,7 @@ export function generateBillPdf(data: BillPdfData): Promise<Buffer> {
 
     // ── Header ──
     setFont(20, true);
-    doc.fillColor("#2D5BE3").text("ApartmentOAT", 60, 50);
+    doc.fillColor("#2D5BE3").text("ระบบจัดการหอพัก", 60, 50);
 
     setFont(12, true);
     doc.fillColor("#0F172A").text("ใบแจ้งหนี้ / Invoice", 60, 80);
@@ -196,7 +196,7 @@ export function generateBillPdf(data: BillPdfData): Promise<Buffer> {
     doc.moveTo(60, footerY - 10).lineTo(535, footerY - 10).strokeColor("#E2E8F0").lineWidth(0.5).stroke();
     setFont(8);
     doc.fillColor("#94A3B8")
-      .text("เอกสารนี้สร้างโดยระบบ ApartmentOAT — กรุณาเก็บไว้เป็นหลักฐาน", 60, footerY, {
+      .text("เอกสารนี้สร้างโดยระบบจัดการหอพัก — กรุณาเก็บไว้เป็นหลักฐาน", 60, footerY, {
         align: "center", width: pageWidth,
       });
 

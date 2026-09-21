@@ -331,7 +331,7 @@ Desktop:  > 1024px
 **Structure:**
 ```html
 <aside class="sidebar">
-  <div class="sidebar-title">🏢 ApartmentOAT</div>
+  <div class="sidebar-title">🏢 ระบบจัดการหอพัก</div>
   <nav class="sidebar-nav">
     <a href="#" class="sidebar-item active">หอพัก</a>
     <a href="#" class="sidebar-item">ห้อง</a>

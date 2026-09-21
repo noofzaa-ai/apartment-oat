@@ -186,20 +186,62 @@ export default function BillsPage() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="page-header no-print">
-        <h1 className="page-title">บิลรายเดือน</h1>
-        <div className="page-actions">
+      <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
+        <div>
+          <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "3rem" }}>📄</span>
+            บิลรายเดือน
+          </h1>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           {bills.length > 0 && (
             <>
-              <button className="btn btn-secondary" onClick={handleExportCSV}>
+              <button
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#B8D8E8",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
+                onClick={handleExportCSV}
+              >
                 📊 Export CSV
               </button>
-              <button className="btn btn-secondary" onClick={handlePrint}>
+              <button
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#B8D8E8",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
+                onClick={handlePrint}
+              >
                 🖨️ พิมพ์
               </button>
             </>
           )}
-          <button className="btn btn-primary" onClick={handleGenerate} disabled={generating || !period}>
+          <button
+            style={{
+              padding: "14px 28px",
+              borderRadius: 16,
+              fontSize: "1rem",
+              fontWeight: 900,
+              background: generating || !period ? "#CBD5E1" : "#7FDB9A",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              cursor: generating || !period ? "not-allowed" : "pointer",
+            }}
+            onClick={handleGenerate}
+            disabled={generating || !period}
+          >
             {generating ? "กำลังสร้าง..." : "⚡ สร้าง/รีเฟรชบิล"}
           </button>
         </div>
@@ -211,13 +253,13 @@ export default function BillsPage() {
         {selectedLocation && <p>หอพัก: {selectedLocation.name}</p>}
       </div>
 
-      <div className="toolbar no-print">
+      <div className="toolbar no-print" style={{ display: "flex", gap: 16, alignItems: "flex-end", marginBottom: 24, flexWrap: "wrap" }}>
         <div className="form-group" style={{ marginBottom: 0 }}>
-          <label style={{ fontSize: "0.8rem", marginBottom: 4 }}>หอพัก</label>
+          <label style={{ fontSize: "0.875rem", marginBottom: 6, display: "block", fontWeight: 700, color: "#2C3E50" }}>หอพัก</label>
           <select
             value={selectedLocationId}
             onChange={(e) => setSelectedLocationId(e.target.value)}
-            style={{ minWidth: 180 }}
+            style={{ minWidth: 180, padding: "10px 14px", borderRadius: 12, fontSize: "0.95rem", fontWeight: 700, background: "#FFFFFF", border: "4px solid #2C3E50", color: "#2C3E50", cursor: "pointer" }}
           >
             <option value="">-- ทุกหอพัก --</option>
             {locations.map((l) => (
@@ -226,16 +268,16 @@ export default function BillsPage() {
           </select>
         </div>
         <div className="form-group" style={{ marginBottom: 0 }}>
-          <label style={{ fontSize: "0.8rem", marginBottom: 4 }}>เดือน</label>
+          <label style={{ fontSize: "0.875rem", marginBottom: 6, display: "block", fontWeight: 700, color: "#2C3E50" }}>เดือน</label>
           <input
             type="month"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            style={{ width: "auto" }}
+            style={{ width: "auto", padding: "10px 14px", borderRadius: 12, fontSize: "0.95rem", fontWeight: 700, background: "#FFFFFF", border: "4px solid #2C3E50", color: "#2C3E50" }}
           />
         </div>
         {period && (
-          <span style={{ alignSelf: "flex-end", paddingBottom: 2, color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>
+          <span style={{ alignSelf: "flex-end", paddingBottom: 10, color: "#64748B", fontSize: "0.95rem", fontWeight: 700 }}>
             {thaiPeriod(period)}
             {selectedLocation && ` — ${selectedLocation.name}`}
           </span>
@@ -243,46 +285,63 @@ export default function BillsPage() {
       </div>
 
       {loading ? (
-        <div className="loading">กำลังโหลด...</div>
+        <div style={{ textAlign: "center", padding: 64, fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>
+          กำลังโหลด...
+        </div>
       ) : bills.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📄</div>
-          <p className="empty-state-text">ยังไม่มีบิลเดือนนี้</p>
-          <p style={{ fontSize: "0.875rem", color: "var(--color-text-secondary)", marginBottom: "var(--space-md)" }}>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 24, padding: "64px 40px", textAlign: "center" }}>
+          <div style={{ fontSize: "5rem", marginBottom: 16 }}>📄</div>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700, marginBottom: 12 }}>
+            ยังไม่มีบิลเดือนนี้
+          </p>
+          <p style={{ fontSize: "0.875rem", color: "#64748B", marginBottom: 24, fontWeight: 600 }}>
             กด &quot;สร้าง/รีเฟรชบิล&quot; หลังจากบันทึกมิเตอร์แล้ว
           </p>
-          <button className="btn btn-primary" onClick={handleGenerate} disabled={generating}>
+          <button
+            style={{
+              padding: "14px 28px",
+              borderRadius: 16,
+              fontSize: "1rem",
+              fontWeight: 900,
+              background: generating ? "#CBD5E1" : "#7FDB9A",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              cursor: generating ? "not-allowed" : "pointer",
+            }}
+            onClick={handleGenerate}
+            disabled={generating}
+          >
             {generating ? "กำลังสร้าง..." : "⚡ สร้างบิล"}
           </button>
         </div>
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="summary-cards">
-            <div className="summary-card">
-              <div className="summary-card-label">ค่าเช่ารวม</div>
-              <div className="summary-card-value">{fmt(totalRent)}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginTop: 2 }}>บาท</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 24 }}>
+            <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+              <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ค่าเช่ารวม</div>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#2C3E50" }}>{fmt(totalRent)}</div>
+              <div style={{ fontSize: "0.75rem", color: "#64748B", marginTop: 2, fontWeight: 600 }}>บาท</div>
             </div>
-            <div className="summary-card">
-              <div className="summary-card-label">ค่าน้ำรวม</div>
-              <div className="summary-card-value" style={{ color: "var(--color-info)" }}>{fmt(totalWater)}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginTop: 2 }}>บาท</div>
+            <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+              <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ค่าน้ำรวม</div>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#3B82F6" }}>{fmt(totalWater)}</div>
+              <div style={{ fontSize: "0.75rem", color: "#64748B", marginTop: 2, fontWeight: 600 }}>บาท</div>
             </div>
-            <div className="summary-card">
-              <div className="summary-card-label">ค่าไฟรวม</div>
-              <div className="summary-card-value" style={{ color: "var(--color-warning)" }}>{fmt(totalElec)}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginTop: 2 }}>บาท</div>
+            <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+              <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ค่าไฟรวม</div>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#F59E0B" }}>{fmt(totalElec)}</div>
+              <div style={{ fontSize: "0.75rem", color: "#64748B", marginTop: 2, fontWeight: 600 }}>บาท</div>
             </div>
-            <div className="summary-card">
-              <div className="summary-card-label">ค่า Options รวม</div>
-              <div className="summary-card-value">{fmt(totalOptions)}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginTop: 2 }}>บาท</div>
+            <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px" }}>
+              <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ค่า Options รวม</div>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#2C3E50" }}>{fmt(totalOptions)}</div>
+              <div style={{ fontSize: "0.75rem", color: "#64748B", marginTop: 2, fontWeight: 600 }}>บาท</div>
             </div>
-            <div className="summary-card" style={{ borderLeft: "3px solid var(--color-primary)" }}>
-              <div className="summary-card-label">ยอดรวมทั้งหมด</div>
-              <div className="summary-card-value" style={{ color: "var(--color-primary)" }}>{fmt(grandTotal)}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", marginTop: 2 }}>
+            <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 16, padding: "20px 24px", borderLeft: "8px solid #2C3E50" }}>
+              <div style={{ fontSize: "0.875rem", color: "#64748B", fontWeight: 700, marginBottom: 4 }}>ยอดรวมทั้งหมด</div>
+              <div style={{ fontSize: "2rem", fontWeight: 900, color: "#2C3E50" }}>{fmt(grandTotal)}</div>
+              <div style={{ fontSize: "0.75rem", color: "#64748B", marginTop: 2, fontWeight: 600 }}>
                 บาท · จ่ายแล้ว {paidCount}/{bills.length} ห้อง
               </div>
             </div>
@@ -308,13 +367,13 @@ export default function BillsPage() {
                   <tr key={bill.id}>
                     <td>
                       <strong
-                        style={{ cursor: "pointer", color: "var(--color-primary)" }}
+                        style={{ cursor: "pointer", color: "#2C3E50" }}
                         onClick={() => setDetailBill(bill)}
                       >
                         {bill.room.roomNumber}
                       </strong>
                       {bill.room.roomType && (
-                        <div style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)" }}>
+                        <div style={{ fontSize: "0.75rem", color: "#64748B" }}>
                           {bill.room.roomType}
                         </div>
                       )}
@@ -322,13 +381,13 @@ export default function BillsPage() {
                     <td>{fmt(bill.baseRent)}</td>
                     <td>
                       {fmt(bill.waterCost)}
-                      <div style={{ fontSize: "0.72rem", color: "var(--color-text-secondary)" }}>
+                      <div style={{ fontSize: "0.72rem", color: "#64748B" }}>
                         ({bill.waterUnits} หน่วย)
                       </div>
                     </td>
                     <td>
                       {fmt(bill.electricCost)}
-                      <div style={{ fontSize: "0.72rem", color: "var(--color-text-secondary)" }}>
+                      <div style={{ fontSize: "0.72rem", color: "#64748B" }}>
                         ({bill.electricUnits} หน่วย)
                       </div>
                     </td>
@@ -342,20 +401,47 @@ export default function BillsPage() {
                     <td className="no-print">
                       <div style={{ display: "flex", gap: 6 }}>
                         <button
-                          className="btn btn-secondary btn-sm"
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: 8,
+                            fontSize: "0.875rem",
+                            fontWeight: 700,
+                            background: "#B8D8E8",
+                            border: "3px solid #2C3E50",
+                            color: "#2C3E50",
+                            cursor: "pointer",
+                          }}
                           onClick={() => setDetailBill(bill)}
                         >
                           รายละเอียด
                         </button>
                         <button
-                          className="btn btn-secondary btn-sm"
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: 8,
+                            fontSize: "0.875rem",
+                            fontWeight: 700,
+                            background: "#B8D8E8",
+                            border: "3px solid #2C3E50",
+                            color: "#2C3E50",
+                            cursor: "pointer",
+                          }}
                           onClick={() => window.open(`/api/admin/bills/${bill.id}/pdf`, "_blank")}
                           title="ดาวน์โหลด PDF"
                         >
                           PDF
                         </button>
                         <button
-                          className={`btn btn-sm ${bill.paymentStatus === "PAID" ? "btn-secondary" : "btn-success"}`}
+                          style={{
+                            padding: "8px 16px",
+                            borderRadius: 8,
+                            fontSize: "0.875rem",
+                            fontWeight: 700,
+                            background: bill.paymentStatus === "PAID" ? "#FFFFFF" : "#7FDB9A",
+                            border: "3px solid #2C3E50",
+                            color: "#2C3E50",
+                            cursor: "pointer",
+                          }}
                           onClick={() => togglePaid(bill)}
                         >
                           {bill.paymentStatus === "PAID" ? "ยกเลิก" : "จ่ายแล้ว"}
@@ -462,17 +548,47 @@ export default function BillsPage() {
               )}
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setDetailBill(null)}>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#FFFFFF",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
+                onClick={() => setDetailBill(null)}
+              >
                 ปิด
               </button>
               <button
-                className="btn btn-secondary"
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#B8D8E8",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
                 onClick={() => window.open(`/api/admin/bills/${detailBill.id}/pdf`, "_blank")}
               >
                 ดาวน์โหลด PDF
               </button>
               <button
-                className={`btn ${detailBill.paymentStatus === "PAID" ? "btn-secondary" : "btn-success"}`}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: detailBill.paymentStatus === "PAID" ? "#FFFFFF" : "#7FDB9A",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
                 onClick={() => togglePaid(detailBill)}
               >
                 {detailBill.paymentStatus === "PAID" ? "เปลี่ยนเป็นค้างชำระ" : "ทำเครื่องหมายจ่ายแล้ว ✓"}

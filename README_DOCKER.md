@@ -1,4 +1,4 @@
-# ApartmentOAT - Docker Deployment Guide
+# Apartment Management - Docker Deployment Guide
 
 ## Quick Start
 

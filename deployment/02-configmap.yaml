@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apartment-oat-config
+  namespace: apartment-oat
+data:
+  NODE_ENV: "production"
+  DATABASE_URL: "file:/app/data/app.db"
+  DAIYOOO_OIDC_ISSUER: "https://account.daiyooo.com/api/auth"
+  DAIYOOO_OIDC_DISCOVERY_URL: "https://account.daiyooo.com/.well-known/openid-configuration"
+  DAIYOOO_OIDC_CLIENT_ID: "apartments"
+  DAIYOOO_OIDC_REDIRECT_URI: "https://apartments.daiyooo.com/auth/callback"
+  DAIYOOO_OIDC_SCOPES: "openid profile email"
+  DAIYOOO_OIDC_PROMPT: ""
+  PRODUCT_BASE_URL: "https://apartments.daiyooo.com"
+  THAI_FONT_PATH: "/app/assets/fonts/Sarabun-Regular.ttf"
+  HOSTNAME: "0.0.0.0"
+  PORT: "3000"

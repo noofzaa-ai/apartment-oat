@@ -1,0 +1,3 @@
+# Ignore generated files
+.latest-tag
+03-secret.yaml

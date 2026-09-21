@@ -1,6 +1,7 @@
 // Helpers สำหรับ OIDC login flow — แยก logic ออกจาก route handler (thin handler).
 import { createHash, randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog } from "@/lib/audit-log";
 
 export const TXN_COOKIE = "apt_oidc_txn";
 export const TXN_TTL_MS = 10 * 60 * 1000; // 10 นาที (ตาม spec)
@@ -114,7 +115,13 @@ export async function provisionUserFromClaims(claims: {
   });
 
   if (existing) {
+    // Check if user should be auto-promoted to PLATFORM_ADMIN
+    const adminEmails = process.env.PLATFORM_ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) ?? [];
+    const shouldPromote = claims.email && adminEmails.includes(claims.email.toLowerCase());
+
     // update profile snapshot ที่อนุญาต — ไม่แตะ local authorization
+    // + update lastLoginAt on every login
+    // + auto-promote to PLATFORM_ADMIN if email matches
     await prisma.user.update({
       where: { id: existing.userId },
       data: {
@@ -122,18 +129,47 @@ export async function provisionUserFromClaims(claims: {
         email: claims.email ?? undefined,
         emailVerified: claims.emailVerified ?? undefined,
         avatarUrl: claims.picture ?? undefined,
+        lastLoginAt: new Date(),
+        ...(shouldPromote ? { role: "PLATFORM_ADMIN" } : {}),
       },
     });
+
+    // Audit log: user login
+    await createAuditLog({
+      category: "USER",
+      action: "login",
+      userId: existing.userId,
+      details: { email: claims.email, promoted: shouldPromote },
+    });
+
+    // Audit log: admin promotion if applicable
+    if (shouldPromote) {
+      await createAuditLog({
+        category: "ADMIN",
+        action: "auto_promote_admin",
+        userId: existing.userId,
+        targetType: "USER",
+        targetId: existing.userId,
+        details: { email: claims.email, role: "PLATFORM_ADMIN" },
+      });
+    }
+
     return existing.userId;
   }
 
   // ผู้ใช้ใหม่ — สร้าง User + ExternalIdentity ใน transaction เดียว
+  // Check if user should be auto-promoted to PLATFORM_ADMIN
+  const adminEmails = process.env.PLATFORM_ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) ?? [];
+  const shouldPromote = claims.email && adminEmails.includes(claims.email.toLowerCase());
+
   const user = await prisma.user.create({
     data: {
       displayName: claims.name ?? null,
       email: claims.email ?? null,
       emailVerified: claims.emailVerified ?? false,
       avatarUrl: claims.picture ?? null,
+      role: shouldPromote ? "PLATFORM_ADMIN" : "USER",
+      lastLoginAt: new Date(),
       updatedAt: new Date(),
       ExternalIdentity: {
         create: {
@@ -145,6 +181,27 @@ export async function provisionUserFromClaims(claims: {
     },
     select: { id: true },
   });
+
+  // Audit log: new user signup
+  await createAuditLog({
+    category: "USER",
+    action: "signup",
+    userId: user.id,
+    details: { email: claims.email, promoted: shouldPromote },
+  });
+
+  // Audit log: admin promotion if applicable
+  if (shouldPromote) {
+    await createAuditLog({
+      category: "ADMIN",
+      action: "auto_promote_admin",
+      userId: user.id,
+      targetType: "USER",
+      targetId: user.id,
+      details: { email: claims.email, role: "PLATFORM_ADMIN" },
+    });
+  }
+
   return user.id;
 }
 

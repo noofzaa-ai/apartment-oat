@@ -1,4 +1,5 @@
 /* Apartment Management App - Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 * {
   margin: 0;
@@ -7,21 +8,33 @@
 }
 
 :root {
-  --color-primary: #2563EB;
-  --color-primary-dark: #1D4ED8;
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #3B82F6;
+  /* Daiyooo brand theme — matches the public landing page.
+     Primary = warm yellow, accent = deep purple, surfaces = cream. */
+  --brand-yellow: #ffc83d;
+  --brand-yellow-deep: #f6b818;
+  --brand-yellow-shadow: #dfad2d;
+  --brand-purple: #3d284c;
+  --brand-purple-soft: #543665;
+  --brand-cream: #fff9ed;
+  --brand-cream-deep: #fff4d7;
+  --brand-ink: #2b2131;
 
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
+  --color-primary: #ffc83d;
+  --color-primary-dark: #f6b818;
+  --color-primary-contrast: #2b2131;
+  --color-success: #4dc88c;
+  --color-warning: #e0a12a;
+  --color-error: #e05a5a;
+  --color-info: #7d59e9;
+
+  --color-text-primary: #2b2131;
+  --color-text-secondary: #675e6b;
   --color-bg-primary: #FFFFFF;
-  --color-bg-light: #F3F4F6;
-  --color-bg-lighter: #F9FAFB;
-  --color-border: #E5E7EB;
+  --color-bg-light: #fffdfa;
+  --color-bg-lighter: #fff9ed;
+  --color-border: #ece3d5;
 
-  --font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  --font-family: 'IBM Plex Sans Thai', 'DM Sans', 'Inter', 'Segoe UI', sans-serif;
   --font-size-base: 16px;
   --line-height-body: 1.6;
 
@@ -55,7 +68,7 @@ html, body {
 /* Sidebar */
 .sidebar {
   width: 256px;
-  background-color: #1F2937;
+  background-color: var(--brand-purple);
   color: white;
   padding: var(--space-lg);
   flex-shrink: 0;
@@ -104,9 +117,9 @@ html, body {
 }
 
 .sidebar-item.active {
-  background-color: var(--color-primary);
-  color: white;
-  font-weight: 500;
+  background-color: var(--brand-yellow);
+  color: var(--brand-ink);
+  font-weight: 600;
 }
 
 .main-content {
@@ -246,7 +259,7 @@ html, body {
 
 .btn-primary {
   background-color: var(--color-primary);
-  color: white;
+  color: var(--color-primary-contrast);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -861,5 +874,731 @@ select[disabled] {
 @media (max-width: 480px) {
   .summary-cards {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   Subscription & Pricing Components
+   ======================================== */
+
+/* Subscription page container */
+.subscription-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.subscription-plan-info {
+  margin-bottom: var(--space-lg);
+}
+
+.subscription-plan-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.subscription-plan-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-top: var(--space-sm);
+}
+
+.subscription-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detail-label {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.detail-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Feature list */
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.95rem;
+}
+
+.feature-check {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+/* Badge */
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background-color: rgba(77, 200, 140, 0.15);
+  color: var(--color-success);
+}
+
+.badge-warning {
+  background-color: rgba(224, 161, 42, 0.15);
+  color: var(--color-warning);
+}
+
+.badge-error {
+  background-color: rgba(224, 90, 90, 0.15);
+  color: var(--color-error);
+}
+
+/* Billing cycle toggle */
+.billing-toggle-container {
+  display: flex;
+  justify-content: center;
+  margin: var(--space-xl) 0;
+}
+
+.billing-toggle {
+  display: inline-flex;
+  background-color: var(--color-bg-lighter);
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.billing-toggle-btn {
+  position: relative;
+  padding: 10px 24px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.billing-toggle-btn.active {
+  background-color: var(--color-primary);
+  color: var(--brand-purple);
+  box-shadow: var(--shadow-sm);
+}
+
+.billing-toggle-badge {
+  font-size: 0.75rem;
+  background-color: var(--color-success);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Plans grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+.plan-card {
+  position: relative;
+  background: white;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.plan-card-current {
+  border-color: var(--color-primary);
+  background-color: var(--brand-cream);
+}
+
+.plan-card-featured {
+  border-color: var(--brand-purple);
+  border-width: 3px;
+}
+
+.plan-card-badge {
+  position: absolute;
+  top: -12px;
+  right: var(--space-lg);
+  background: linear-gradient(135deg, var(--brand-purple), var(--brand-purple-soft));
+  color: white;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plan-card-header {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.plan-card-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: var(--space-md);
+  color: var(--color-text-primary);
+}
+
+.plan-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.price-amount {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--brand-purple);
+}
+
+.price-period {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.price-note {
+  margin-top: var(--space-xs);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.plan-card-limit {
+  margin-top: var(--space-sm);
+  font-size: 0.9rem;
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.plan-card-body {
+  flex: 1;
+  margin-bottom: var(--space-lg);
+}
+
+.plan-card-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.plan-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.plan-card-footer {
+  margin-top: auto;
+}
+
+/* Upgrade price summary */
+.upgrade-price-summary {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--color-bg-lighter);
+  border-radius: var(--border-radius);
+}
+
+.upgrade-price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+}
+
+.upgrade-price-total {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 2px solid var(--color-border);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.price-highlight {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+}
+
+/* Quota warning banner */
+.quota-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: linear-gradient(135deg, rgba(224, 161, 42, 0.1), rgba(224, 161, 42, 0.05));
+  border: 2px solid var(--color-warning);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-lg);
+}
+
+.quota-banner-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+.quota-banner-icon {
+  font-size: 1.5rem;
+}
+
+.quota-banner-text {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.quota-banner-link {
+  padding: 8px 16px;
+  background-color: var(--color-warning);
+  color: white;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.quota-banner-link:hover {
+  background-color: #c98a1f;
+  transform: translateY(-1px);
+}
+
+.quota-banner-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.quota-banner-close:hover {
+  color: var(--color-text-primary);
+}
+
+/* Upgrade CTA card */
+.upgrade-cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  background: linear-gradient(135deg, var(--brand-cream), var(--brand-cream-deep));
+  border: 3px dashed var(--color-border);
+  border-radius: var(--border-radius);
+  text-align: center;
+  min-height: 300px;
+}
+
+.upgrade-cta-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-lg);
+}
+
+.upgrade-cta-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+  color: var(--color-text-primary);
+}
+
+.upgrade-cta-text {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xl);
+  line-height: 1.6;
+}
+
+/* Text utilities */
+.text-muted {
+  color: var(--color-text-secondary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+/* Page subtitle */
+.page-subtitle {
+  margin-top: var(--space-sm);
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* ============================================
+   CLAYMORPHISM QUOTA WARNING COMPONENTS
+   ============================================ */
+
+/* Quota Warning Banner - Claymorphism style */
+.quota-warning-clay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  background: linear-gradient(135deg, #ffd93d 0%, #ffb84d 100%);
+  border: 4px solid #000000;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  margin-bottom: var(--space-lg);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quota-warning-clay:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+}
+
+.quota-warning-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex: 1;
+}
+
+.quota-warning-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.quota-warning-text {
+  flex: 1;
+}
+
+.quota-warning-text strong {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2b2131;
+  margin-bottom: 4px;
+}
+
+.quota-warning-text p {
+  font-size: 0.95rem;
+  color: #3d2817;
+  margin: 0;
+}
+
+.quota-warning-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: white;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quota-warning-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1);
+  background: linear-gradient(135deg, #ff7d47 0%, #ff9e54 100%);
+}
+
+.quota-warning-close {
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3rem;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.quota-warning-close:hover {
+  background: #ffeb3b;
+  transform: rotate(90deg);
+}
+
+/* Quota Exceeded Modal - Claymorphism style */
+.modal-overlay-clay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-lg);
+}
+
+.quota-modal-clay {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+  border: 4px solid #000000;
+  border-radius: 24px;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  padding: var(--space-2xl);
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+  text-align: center;
+  animation: modalBounceIn 0.3s ease-out;
+}
+
+@keyframes modalBounceIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.quota-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.4rem;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.quota-modal-close:hover {
+  background: #ffeb3b;
+  transform: rotate(90deg) scale(1.1);
+}
+
+.quota-modal-icon {
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: var(--space-lg);
+  animation: iconShake 0.5s ease-in-out;
+}
+
+@keyframes iconShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+.quota-modal-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: var(--space-lg);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.quota-modal-body {
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 16px;
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.quota-modal-text {
+  font-size: 1.1rem;
+  color: #2b2131;
+  margin-bottom: var(--space-sm);
+  line-height: 1.6;
+}
+
+.quota-modal-text strong {
+  color: #ff6b35;
+  font-weight: 700;
+}
+
+.quota-modal-subtext {
+  font-size: 0.95rem;
+  color: #675e6b;
+  margin: 0;
+}
+
+.quota-modal-subtext strong {
+  color: #2b2131;
+  font-weight: 700;
+}
+
+.quota-modal-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.quota-modal-btn-secondary {
+  padding: 14px 28px;
+  background: white;
+  color: #2b2131;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quota-modal-btn-secondary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  background: #f5f5f5;
+}
+
+.quota-modal-btn-primary {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #4dc88c 0%, #3db57a 100%);
+  color: white;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.quota-modal-btn-primary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+  background: linear-gradient(135deg, #5dd99d 0%, #4ec68b 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quota-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .subscription-plan-price {
+    font-size: 1.75rem;
+  }
+  
+  .price-amount {
+    font-size: 2rem;
+  }
+
+  .quota-warning-clay {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-md);
+  }
+
+  .quota-warning-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .quota-warning-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quota-warning-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+
+  .quota-modal-clay {
+    padding: var(--space-lg);
+    margin: var(--space-md);
+  }
+
+  .quota-modal-title {
+    font-size: 1.4rem;
+  }
+
+  .quota-modal-icon {
+    font-size: 4rem;
+  }
+
+  .quota-modal-actions {
+    flex-direction: column;
+  }
+
+  .quota-modal-btn-secondary,
+  .quota-modal-btn-primary {
+    width: 100%;
   }
 }

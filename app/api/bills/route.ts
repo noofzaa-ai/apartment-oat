@@ -1,75 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, unauthorized } from "@/lib/auth";
+import { requireUserId, isAuthResponse } from "@/lib/auth";
+
+export const runtime = "nodejs";
+
+function mapBill(bill: any) {
+  return { ...bill, room: { ...bill.room, location: bill.room.Apartment } };
+}
+
+function previousPeriod(period: string) {
+  const [year, month] = period.split("-").map(Number);
+  const prevDate = new Date(year, month - 2, 1);
+  return `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
+}
 
 export async function GET(req: NextRequest) {
-  if (!(await requireAdmin())) return unauthorized();
-  const { searchParams } = new URL(req.url);
-  const locationId = searchParams.get("locationId");
-  const period = searchParams.get("period");
-
-  if (!period) {
-    return NextResponse.json({ error: "period required" }, { status: 400 });
-  }
-
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
+  const locationId = req.nextUrl.searchParams.get("locationId");
+  const period = req.nextUrl.searchParams.get("period");
+  if (!period) return NextResponse.json({ error: "period required" }, { status: 400 });
   const bills = await prisma.bill.findMany({
     where: {
       period,
-      room: locationId ? { locationId: Number(locationId) } : undefined,
+      room: {
+        Apartment: { ownerUserId: userId },
+        ...(locationId ? { apartmentId: Number(locationId) } : {}),
+      },
     },
     include: {
-      room: {
-        include: {
-          options: true,
-          location: { select: { id: true, name: true } },
-        },
-      },
+      room: { include: { options: true, Apartment: { select: { id: true, name: true } } } },
       lineItems: true,
     },
     orderBy: { room: { roomNumber: "asc" } },
   });
-
-  return NextResponse.json(bills);
+  return NextResponse.json(bills.map(mapBill));
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin())) return unauthorized();
-  // Generate/refresh bills for a period + location
-  const body = await req.json();
-  const { locationId, period } = body;
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
+  const { locationId, period } = await req.json();
+  if (!period) return NextResponse.json({ error: "period required" }, { status: 400 });
+  const prevPeriod = previousPeriod(period);
 
-  if (!period) {
-    return NextResponse.json({ error: "period required" }, { status: 400 });
-  }
-
-  const [year, month] = period.split("-").map(Number);
-  const prevDate = new Date(year, month - 2, 1);
-  const prevPeriod = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, "0")}`;
-
-  // Get rooms
   const rooms = await prisma.room.findMany({
-    where: locationId ? { locationId: Number(locationId) } : undefined,
+    where: {
+      Apartment: { ownerUserId: userId },
+      ...(locationId ? { apartmentId: Number(locationId) } : {}),
+    },
     include: { options: true },
     orderBy: { roomNumber: "asc" },
   });
 
-  const results = [];
-  const errors = [];
+  const results: unknown[] = [];
+  const errors: unknown[] = [];
 
   for (const room of rooms) {
-    const currReading = await prisma.meterReading.findUnique({
-      where: { roomId_period: { roomId: room.id, period } },
-    });
-
+    const currReading = await prisma.meterReading.findUnique({ where: { roomId_period: { roomId: room.id, period } } });
     if (!currReading) {
       errors.push({ roomId: room.id, roomNumber: room.roomNumber, error: "ยังไม่มีข้อมูลมิเตอร์เดือนนี้" });
       continue;
     }
-
-    const prevReading = await prisma.meterReading.findUnique({
-      where: { roomId_period: { roomId: room.id, period: prevPeriod } },
-    });
-
+    const prevReading = await prisma.meterReading.findUnique({ where: { roomId_period: { roomId: room.id, period: prevPeriod } } });
     const waterUnits = prevReading ? currReading.waterReading - prevReading.waterReading : 0;
     const electricUnits = prevReading ? currReading.electricReading - prevReading.electricReading : 0;
     const waterCost = Math.max(0, waterUnits) * room.waterRate;
@@ -84,44 +77,25 @@ export async function POST(req: NextRequest) {
       ...room.options.map((o) => ({ label: o.name, amount: o.price })),
     ];
 
-    // Upsert bill (preserve paymentStatus if exists)
-    const existing = await prisma.bill.findUnique({
-      where: { roomId_period: { roomId: room.id, period } },
-    });
-
-    await prisma.billLineItem.deleteMany({
-      where: { billId: existing?.id ?? -1 },
-    });
+    const existing = await prisma.bill.findUnique({ where: { roomId_period: { roomId: room.id, period } } });
+    await prisma.billLineItem.deleteMany({ where: { billId: existing?.id ?? -1 } });
 
     const bill = await prisma.bill.upsert({
       where: { roomId_period: { roomId: room.id, period } },
       create: {
-        roomId: room.id,
-        period,
-        baseRent: room.baseRent,
-        waterUnits: Math.max(0, waterUnits),
-        waterCost,
-        electricUnits: Math.max(0, electricUnits),
-        electricCost,
-        optionsCost,
-        total,
-        paymentStatus: "UNPAID",
+        roomId: room.id, period, baseRent: room.baseRent, waterUnits: Math.max(0, waterUnits), waterCost,
+        electricUnits: Math.max(0, electricUnits), electricCost, optionsCost, total, paymentStatus: "UNPAID",
         lineItems: { create: lineItems },
       },
       update: {
-        baseRent: room.baseRent,
-        waterUnits: Math.max(0, waterUnits),
-        waterCost,
-        electricUnits: Math.max(0, electricUnits),
-        electricCost,
-        optionsCost,
-        total,
+        baseRent: room.baseRent, waterUnits: Math.max(0, waterUnits), waterCost,
+        electricUnits: Math.max(0, electricUnits), electricCost, optionsCost, total,
         lineItems: { create: lineItems },
       },
-      include: { lineItems: true, room: { include: { location: { select: { name: true } } } } },
+      include: { lineItems: true, room: { include: { Apartment: { select: { id: true, name: true } } } } },
     });
 
-    results.push({ bill, noPrevReading: !prevReading });
+    results.push({ bill: mapBill(bill), noPrevReading: !prevReading });
   }
 
   return NextResponse.json({ results, errors });

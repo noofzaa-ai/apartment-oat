@@ -1,41 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { requireUserId, isAuthResponse } from "@/lib/auth";
 import { generateBillPdf } from "@/lib/pdf";
 
-async function requireAdmin() {
-  const session = await getSession();
-  if (!session.userId || session.role !== "admin") return null;
-  return session;
-}
+export const runtime = "nodejs";
+type Ctx = { params: Promise<{ id: string }> };
 
-// GET /api/admin/bills/[id]/pdf — download any bill as PDF (admin only)
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function GET(_req: NextRequest, { params }: Ctx) {
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
   const { id } = await params;
   const billId = Number(id);
 
-  const bill = await prisma.bill.findUnique({
-    where: { id: billId },
-    include: {
-      lineItems: true,
-      room: {
-        include: {
-          location: { select: { name: true } },
-        },
-      },
-    },
+  const bill = await prisma.bill.findFirst({
+    where: { id: billId, room: { Apartment: { ownerUserId: userId } } },
+    include: { lineItems: true, room: { include: { Apartment: { select: { name: true } } } } },
   });
-
-  if (!bill) {
-    return NextResponse.json({ error: "ไม่พบบิล" }, { status: 404 });
-  }
+  if (!bill) return NextResponse.json({ error: "ไม่พบบิล" }, { status: 404 });
 
   const pdfBuffer = await generateBillPdf({
-    locationName: bill.room.location.name,
+    locationName: bill.room.Apartment.name,
     roomNumber: bill.room.roomNumber,
     roomType: bill.room.roomType,
     period: bill.period,
@@ -54,7 +38,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   });
 
   const filename = `bill-${bill.room.roomNumber}-${bill.period}.pdf`;
-
   return new NextResponse(pdfBuffer as unknown as BodyInit, {
     status: 200,
     headers: {

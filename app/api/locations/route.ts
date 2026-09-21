@@ -1,33 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, unauthorized } from "@/lib/auth";
+import { requireUserId, requireActiveSubscription, isAuthResponse } from "@/lib/auth";
+
+export const runtime = "nodejs";
 
 export async function GET() {
-  if (!(await requireAdmin())) return unauthorized();
-
-  const locations = await prisma.location.findMany({
-    include: {
-      _count: { select: { rooms: true } },
-    },
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
+  const apartments = await prisma.apartment.findMany({
+    where: { ownerUserId: userId },
+    include: { _count: { select: { Room: true } } },
     orderBy: { createdAt: "asc" },
   });
-  return NextResponse.json(locations);
+  return NextResponse.json(apartments);
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await requireAdmin())) return unauthorized();
-
-  const body = await req.json();
-  const { name, address } = body;
-
-  if (!name?.trim()) {
-    return NextResponse.json({ error: "ชื่อหอพักจำเป็น" }, { status: 400 });
-  }
-
-  const location = await prisma.location.create({
-    data: { name: name.trim(), address: address?.trim() || null },
-    include: { _count: { select: { rooms: true } } },
+  // GATE: สร้างหอได้เฉพาะผู้มีแพ็กเกจที่ใช้งานอยู่ (TRIAL ยังไม่หมด / ACTIVE)
+  const userId = await requireActiveSubscription();
+  if (isAuthResponse(userId)) return userId;
+  const { name, address } = await req.json();
+  if (!name?.trim()) return NextResponse.json({ error: "ชื่อหอพักจำเป็น" }, { status: 400 });
+  const apartment = await prisma.apartment.create({
+    data: {
+      ownerUserId: userId,
+      name: name.trim(),
+      address: address?.trim() || null,
+      Membership: { create: { userId, role: "OWNER" } },
+    },
+    include: { _count: { select: { Room: true } } },
   });
-
-  return NextResponse.json(location, { status: 201 });
+  return NextResponse.json(apartment, { status: 201 });
 }

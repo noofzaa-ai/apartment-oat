@@ -6,50 +6,23 @@ datasource db {
   provider = "sqlite"
 }
 
-model Admin {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-}
-
-model Tenant {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  phone       String?
-  pinHash     String
-  roomId      Int?      @unique
-  moveInDate  DateTime?
-  deposit     Float?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  room        Room?     @relation(fields: [roomId], references: [id])
-}
-
-model Location {
-  id        Int      @id @default(autoincrement())
-  name      String
-  address   String?
-  createdAt DateTime @default(now())
-  rooms     Room[]
-}
-
 model Room {
   id            Int            @id @default(autoincrement())
-  locationId    Int
+  apartmentId   Int
   roomNumber    String
   roomType      String?
   baseRent      Float
   waterRate     Float
   electricRate  Float
-  location      Location       @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  options       RoomOption[]
-  meterReadings MeterReading[]
   bills         Bill[]
-  tenant        Tenant?
+  InviteCode    InviteCode[]
+  Membership    Membership?
+  meterReadings MeterReading[]
+  Apartment     Apartment      @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  options       RoomOption[]
 
-  @@unique([locationId, roomNumber])
+  @@unique([apartmentId, roomNumber])
+  @@index([apartmentId])
 }
 
 model RoomOption {
@@ -73,26 +46,26 @@ model MeterReading {
 }
 
 model Bill {
-  id            Int           @id @default(autoincrement())
-  roomId        Int
-  period        String
-  baseRent      Float
-  waterUnits    Float
-  waterCost     Float
-  electricUnits Float
-  electricCost  Float
-  optionsCost   Float
-  total         Float
-  paymentStatus        String        @default("UNPAID")
-  paidAt               DateTime?
-  paymentSlipUrl       String?
-  paymentSubmittedAt   DateTime?
-  paymentNote          String?
+  id                     Int            @id @default(autoincrement())
+  roomId                 Int
+  period                 String
+  baseRent               Float
+  waterUnits             Float
+  waterCost              Float
+  electricUnits          Float
+  electricCost           Float
+  optionsCost            Float
+  total                  Float
+  paymentStatus          String         @default("UNPAID")
+  paidAt                 DateTime?
+  paymentSlipUrl         String?
+  paymentSubmittedAt     DateTime?
+  paymentNote            String?
   paymentRejectionReason String?
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  room          Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  lineItems     BillLineItem[]
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  room                   Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  lineItems              BillLineItem[]
 
   @@unique([roomId, period])
 }
@@ -103,4 +76,186 @@ model BillLineItem {
   label  String
   amount Float
   bill   Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+}
+
+model Apartment {
+  id          Int          @id @default(autoincrement())
+  ownerUserId Int
+  name        String
+  address     String?
+  createdAt   DateTime     @default(now())
+  User        User         @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  InviteCode  InviteCode[]
+  Membership  Membership[]
+  Room        Room[]
+  RoomPreset  RoomPreset[]
+
+  @@index([ownerUserId])
+}
+
+model ExternalIdentity {
+  id        Int      @id @default(autoincrement())
+  provider  String   @default("daiyooo-account")
+  issuer    String
+  subject   String
+  userId    Int
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([issuer, subject])
+  @@index([userId])
+}
+
+model InviteCode {
+  id                                    Int       @id @default(autoincrement())
+  code                                  String    @unique
+  apartmentId                           Int
+  roomId                                Int
+  expiresAt                             DateTime
+  usedByUserId                          Int?
+  usedAt                                DateTime?
+  createdByUserId                       Int
+  createdAt                             DateTime  @default(now())
+  User_InviteCode_createdByUserIdToUser User      @relation("InviteCode_createdByUserIdToUser", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  User_InviteCode_usedByUserIdToUser    User?     @relation("InviteCode_usedByUserIdToUser", fields: [usedByUserId], references: [id])
+  Room                                  Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  Apartment                             Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@index([apartmentId])
+}
+
+model Membership {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  apartmentId Int
+  role        String
+  roomId      Int?      @unique
+  createdAt   DateTime  @default(now())
+  Room        Room?     @relation(fields: [roomId], references: [id])
+  Apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, apartmentId])
+  @@index([userId])
+  @@index([apartmentId])
+}
+
+model OidcTransaction {
+  id           String   @id
+  stateHash    String   @unique
+  nonce        String
+  codeVerifier String
+  redirectUri  String
+  returnTo     String   @default("/")
+  used         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+}
+
+model Plan {
+  code         String         @id
+  name         String
+  displayName  String
+  pricePerRoom Float
+  tierSize     Int            @default(25)
+  maxRooms     Int?
+  features     String         @default("[]")
+  isActive     Boolean        @default(true)
+  sortOrder    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  Subscription Subscription[]
+}
+
+model RoomPreset {
+  id               Int                @id @default(autoincrement())
+  apartmentId      Int
+  name             String
+  roomType         String?
+  baseRent         Float
+  waterRate        Float
+  electricRate     Float
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Apartment        Apartment          @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  RoomPresetOption RoomPresetOption[]
+
+  @@index([apartmentId])
+}
+
+model RoomPresetOption {
+  id         Int        @id @default(autoincrement())
+  presetId   Int
+  name       String
+  price      Float
+  RoomPreset RoomPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                 Int       @id @default(autoincrement())
+  userId             Int       @unique
+  planCode           String
+  status             String    @default("TRIAL")
+  billingCycle       String    @default("MONTHLY")
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  roomQuotaSnapshot  Int?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  Plan               Plan      @relation(fields: [planCode], references: [code])
+  User               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([planCode])
+}
+
+model User {
+  id                                          Int                @id @default(autoincrement())
+  displayName                                 String?
+  email                                       String?
+  emailVerified                               Boolean            @default(false)
+  avatarUrl                                   String?
+  role                                        String             @default("USER")
+  status                                      String             @default("ACTIVE")
+  lastLoginAt                                 DateTime?
+  createdAt                                   DateTime           @default(now())
+  updatedAt                                   DateTime
+  Apartment                                   Apartment[]
+  ExternalIdentity                            ExternalIdentity[]
+  InviteCode_InviteCode_createdByUserIdToUser InviteCode[]       @relation("InviteCode_createdByUserIdToUser")
+  InviteCode_InviteCode_usedByUserIdToUser    InviteCode[]       @relation("InviteCode_usedByUserIdToUser")
+  Membership                                  Membership[]
+  Subscription                                Subscription?
+  AdminNote                                   AdminNote[]
+}
+
+model AdminNote {
+  id          Int      @id @default(autoincrement())
+  targetType  String
+  targetId    Int
+  adminUserId Int
+  note        String
+  createdAt   DateTime @default(now())
+  admin       User     @relation(fields: [adminUserId], references: [id])
+
+  @@index([targetType, targetId])
+  @@index([adminUserId])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  category   String
+  action     String
+  userId     Int?
+  targetType String?
+  targetId   Int?
+  ipAddress  String?
+  userAgent  String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([category, createdAt])
+  @@index([userId])
+  @@index([targetType, targetId])
 }

@@ -1,31 +1,30 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { requireUserId, isAuthResponse } from "@/lib/auth";
 
-async function requireAdmin() {
-  const session = await getSession();
-  if (!session.userId || session.role !== "admin") return null;
-  return session;
-}
+export const runtime = "nodejs";
 
-// GET /api/admin/slips — list all bills with paymentStatus=SUBMITTED
 export async function GET() {
-  if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+  const userId = await requireUserId();
+  if (isAuthResponse(userId)) return userId;
   const bills = await prisma.bill.findMany({
-    where: { paymentStatus: "SUBMITTED" },
-    orderBy: { paymentSubmittedAt: "asc" },
+    where: { paymentStatus: "SUBMITTED", room: { Apartment: { ownerUserId: userId } } },
     include: {
       room: {
         include: {
-          location: { select: { id: true, name: true } },
-          tenant: { select: { id: true, name: true, email: true } },
+          Apartment: { select: { id: true, name: true } },
+          Membership: { include: { User: { select: { id: true, displayName: true, email: true } } } },
         },
       },
     },
+    orderBy: { paymentSubmittedAt: "asc" },
   });
-
-  return NextResponse.json(bills);
+  return NextResponse.json(bills.map((b) => ({
+    ...b,
+    room: {
+      ...b.room,
+      location: b.room.Apartment,
+      tenant: b.room.Membership ? { id: b.room.Membership.User.id, name: b.room.Membership.User.displayName ?? b.room.Membership.User.email ?? "ผู้เช่า", email: b.room.Membership.User.email ?? "" } : null,
+    },
+  })));
 }

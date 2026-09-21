@@ -147,17 +147,30 @@ export default function MeterReadingPage() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="page-header">
-        <h1 className="page-title">อ่านมิเตอร์</h1>
+      <div style={{ marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+        <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: "3rem" }}>📊</span>
+          อ่านมิเตอร์
+        </h1>
       </div>
 
-      <div className="toolbar">
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label style={{ fontSize: "0.8rem", marginBottom: 4 }}>หอพัก</label>
+      <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap", alignItems: "flex-end" }}>
+        <div style={{ flex: "0 1 auto" }}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 700, color: "#2C3E50", marginBottom: 8 }}>หอพัก</label>
           <select
             value={selectedLocationId}
             onChange={(e) => setSelectedLocationId(e.target.value)}
-            style={{ minWidth: 180 }}
+            style={{
+              minWidth: 200,
+              padding: "12px 16px",
+              border: "3px solid #2C3E50",
+              borderRadius: 16,
+              fontSize: "1rem",
+              color: "#2C3E50",
+              fontWeight: 600,
+              outline: "none",
+              background: "#FFFFFF",
+            }}
           >
             <option value="">-- เลือกหอพัก --</option>
             {locations.map((l) => (
@@ -165,54 +178,82 @@ export default function MeterReadingPage() {
             ))}
           </select>
         </div>
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label style={{ fontSize: "0.8rem", marginBottom: 4 }}>เดือน</label>
+        <div style={{ flex: "0 1 auto" }}>
+          <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 700, color: "#2C3E50", marginBottom: 8 }}>เดือน</label>
           <input
             type="month"
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            style={{ width: "auto" }}
+            style={{
+              width: "auto",
+              padding: "12px 16px",
+              border: "3px solid #2C3E50",
+              borderRadius: 16,
+              fontSize: "1rem",
+              color: "#2C3E50",
+              fontWeight: 600,
+              outline: "none",
+              background: "#FFFFFF",
+            }}
           />
         </div>
-        {period && <span style={{ alignSelf: "flex-end", paddingBottom: 2, color: "var(--color-text-secondary)", fontSize: "0.9rem" }}>
+        {period && <span style={{ paddingBottom: 2, color: "#64748B", fontSize: "0.9375rem", fontWeight: 700 }}>
           {thaiPeriod(period)}
         </span>}
       </div>
 
       {!selectedLocationId ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📊</div>
-          <p className="empty-state-text">กรุณาเลือกหอพัก</p>
+        <div
+          style={{
+            textAlign: "center",
+            padding: 64,
+            background: "#FFFFFF",
+            border: "4px solid #2C3E50",
+            borderRadius: 24,
+          }}
+        >
+          <div style={{ fontSize: "5rem", marginBottom: 16 }}>📊</div>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>กรุณาเลือกหอพัก</p>
         </div>
       ) : loading ? (
-        <div className="loading">กำลังโหลด...</div>
+        <div style={{ textAlign: "center", padding: 64, fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>
+          กำลังโหลด...
+        </div>
       ) : data.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🚪</div>
-          <p className="empty-state-text">ไม่มีห้องในหอพักนี้</p>
+        <div
+          style={{
+            textAlign: "center",
+            padding: 64,
+            background: "#FFFFFF",
+            border: "4px solid #2C3E50",
+            borderRadius: 24,
+          }}
+        >
+          <div style={{ fontSize: "5rem", marginBottom: 16 }}>🚪</div>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>ไม่มีห้องในหอพักนี้</p>
         </div>
       ) : (
         <>
-          <div className="table-container">
-            <table>
+          <div style={{ overflowX: "auto", background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 24 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  <th>ห้อง</th>
-                  <th colSpan={2} style={{ textAlign: "center", background: "rgba(59,130,246,0.06)" }}>
+                  <th style={{ padding: "16px 20px", textAlign: "left", borderBottom: "3px solid #2C3E50", fontWeight: 900, color: "#2C3E50", fontSize: "1rem" }}>ห้อง</th>
+                  <th colSpan={2} style={{ padding: "16px 20px", textAlign: "center", background: "rgba(59,130,246,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 900, color: "#2C3E50", fontSize: "1rem" }}>
                     💧 มิเตอร์น้ำ
                   </th>
-                  <th colSpan={2} style={{ textAlign: "center", background: "rgba(245,158,11,0.06)" }}>
+                  <th colSpan={2} style={{ padding: "16px 20px", textAlign: "center", background: "rgba(245,158,11,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 900, color: "#2C3E50", fontSize: "1rem" }}>
                     ⚡ มิเตอร์ไฟ
                   </th>
-                  <th>หมายเหตุ</th>
+                  <th style={{ padding: "16px 20px", textAlign: "left", borderBottom: "3px solid #2C3E50", fontWeight: 900, color: "#2C3E50", fontSize: "1rem" }}>หมายเหตุ</th>
                 </tr>
                 <tr>
-                  <th></th>
-                  <th style={{ background: "rgba(59,130,246,0.06)" }}>เดือนก่อน</th>
-                  <th style={{ background: "rgba(59,130,246,0.06)" }}>เดือนนี้</th>
-                  <th style={{ background: "rgba(245,158,11,0.06)" }}>เดือนก่อน</th>
-                  <th style={{ background: "rgba(245,158,11,0.06)" }}>เดือนนี้</th>
-                  <th></th>
+                  <th style={{ padding: "12px 20px", borderBottom: "3px solid #2C3E50" }}></th>
+                  <th style={{ padding: "12px 20px", background: "rgba(59,130,246,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 700, color: "#2C3E50", fontSize: "0.875rem" }}>เดือนก่อน</th>
+                  <th style={{ padding: "12px 20px", background: "rgba(59,130,246,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 700, color: "#2C3E50", fontSize: "0.875rem" }}>เดือนนี้</th>
+                  <th style={{ padding: "12px 20px", background: "rgba(245,158,11,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 700, color: "#2C3E50", fontSize: "0.875rem" }}>เดือนก่อน</th>
+                  <th style={{ padding: "12px 20px", background: "rgba(245,158,11,0.06)", borderBottom: "3px solid #2C3E50", fontWeight: 700, color: "#2C3E50", fontSize: "0.875rem" }}>เดือนนี้</th>
+                  <th style={{ padding: "12px 20px", borderBottom: "3px solid #2C3E50" }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -227,15 +268,17 @@ export default function MeterReadingPage() {
 
                   return (
                     <tr key={row.room.id}>
-                      <td><strong>{row.room.roomNumber}</strong></td>
-                      <td style={{ background: "rgba(59,130,246,0.03)" }}>
+                      <td style={{ padding: "12px 20px", borderBottom: "2px solid #E5E7EB" }}>
+                        <strong style={{ fontWeight: 900, color: "#2C3E50" }}>{row.room.roomNumber}</strong>
+                      </td>
+                      <td style={{ padding: "12px 20px", background: "rgba(59,130,246,0.03)", borderBottom: "2px solid #E5E7EB" }}>
                         {prevWater != null ? (
-                          <span className="meter-prev-value">{prevWater.toLocaleString()}</span>
+                          <span style={{ fontWeight: 700, color: "#2C3E50" }}>{prevWater.toLocaleString()}</span>
                         ) : (
-                          <span style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>ไม่มีข้อมูล</span>
+                          <span style={{ color: "#64748B", fontSize: "0.8rem", fontWeight: 600 }}>ไม่มีข้อมูล</span>
                         )}
                       </td>
-                      <td className="meter-input-cell" style={{ background: "rgba(59,130,246,0.03)" }}>
+                      <td style={{ padding: "12px 20px", background: "rgba(59,130,246,0.03)", borderBottom: "2px solid #E5E7EB" }}>
                         <input
                           type="number"
                           value={inp?.waterReading ?? ""}
@@ -243,17 +286,27 @@ export default function MeterReadingPage() {
                           placeholder="กรอกเลข"
                           min="0"
                           step="0.1"
-                          style={{ textAlign: "right", width: "110px", borderColor: waterWarn ? "var(--color-warning)" : undefined }}
+                          style={{
+                            textAlign: "right",
+                            width: 110,
+                            padding: "8px 12px",
+                            border: waterWarn ? "3px solid #F59E0B" : "3px solid #2C3E50",
+                            borderRadius: 12,
+                            fontSize: "1rem",
+                            color: "#2C3E50",
+                            fontWeight: 600,
+                            outline: "none",
+                          }}
                         />
                       </td>
-                      <td style={{ background: "rgba(245,158,11,0.03)" }}>
+                      <td style={{ padding: "12px 20px", background: "rgba(245,158,11,0.03)", borderBottom: "2px solid #E5E7EB" }}>
                         {prevElec != null ? (
-                          <span className="meter-prev-value">{prevElec.toLocaleString()}</span>
+                          <span style={{ fontWeight: 700, color: "#2C3E50" }}>{prevElec.toLocaleString()}</span>
                         ) : (
-                          <span style={{ color: "var(--color-text-secondary)", fontSize: "0.8rem" }}>ไม่มีข้อมูล</span>
+                          <span style={{ color: "#64748B", fontSize: "0.8rem", fontWeight: 600 }}>ไม่มีข้อมูล</span>
                         )}
                       </td>
-                      <td className="meter-input-cell" style={{ background: "rgba(245,158,11,0.03)" }}>
+                      <td style={{ padding: "12px 20px", background: "rgba(245,158,11,0.03)", borderBottom: "2px solid #E5E7EB" }}>
                         <input
                           type="number"
                           value={inp?.electricReading ?? ""}
@@ -261,18 +314,34 @@ export default function MeterReadingPage() {
                           placeholder="กรอกเลข"
                           min="0"
                           step="0.1"
-                          style={{ textAlign: "right", width: "110px", borderColor: elecWarn ? "var(--color-warning)" : undefined }}
+                          style={{
+                            textAlign: "right",
+                            width: 110,
+                            padding: "8px 12px",
+                            border: elecWarn ? "3px solid #F59E0B" : "3px solid #2C3E50",
+                            borderRadius: 12,
+                            fontSize: "1rem",
+                            color: "#2C3E50",
+                            fontWeight: 600,
+                            outline: "none",
+                          }}
                         />
                       </td>
-                      <td>
+                      <td style={{ padding: "12px 20px", borderBottom: "2px solid #E5E7EB" }}>
                         {!row.previous && (
-                          <span className="badge badge-info" style={{ fontSize: "0.7rem" }}>ไม่มีข้อมูลเดือนก่อน</span>
+                          <span style={{ display: "inline-block", padding: "4px 12px", fontSize: "0.75rem", fontWeight: 700, background: "#B8D8E8", color: "#2C3E50", borderRadius: 12, border: "2px solid #2C3E50" }}>
+                            ไม่มีข้อมูลเดือนก่อน
+                          </span>
                         )}
                         {(waterWarn || elecWarn) && (
-                          <span className="badge badge-warning" style={{ fontSize: "0.7rem" }}>ค่าลดลง</span>
+                          <span style={{ display: "inline-block", padding: "4px 12px", fontSize: "0.75rem", fontWeight: 700, background: "#FEF3C7", color: "#2C3E50", borderRadius: 12, border: "2px solid #F59E0B", marginLeft: 4 }}>
+                            ค่าลดลง
+                          </span>
                         )}
                         {row.current && !waterWarn && !elecWarn && (
-                          <span className="badge badge-success" style={{ fontSize: "0.7rem" }}>บันทึกแล้ว</span>
+                          <span style={{ display: "inline-block", padding: "4px 12px", fontSize: "0.75rem", fontWeight: 700, background: "#7FDB9A", color: "#2C3E50", borderRadius: 12, border: "2px solid #2C3E50" }}>
+                            บันทึกแล้ว
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -282,11 +351,39 @@ export default function MeterReadingPage() {
             </table>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "var(--space-lg)", gap: "var(--space-md)" }}>
-            <button className="btn btn-secondary" onClick={loadReadings} disabled={saving}>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 24, gap: 16 }}>
+            <button
+              style={{
+                padding: "12px 24px",
+                borderRadius: 16,
+                fontSize: "1rem",
+                fontWeight: 900,
+                background: "#FFFFFF",
+                border: "4px solid #2C3E50",
+                color: "#2C3E50",
+                cursor: saving ? "not-allowed" : "pointer",
+                opacity: saving ? 0.5 : 1,
+              }}
+              onClick={loadReadings}
+              disabled={saving}
+            >
               รีเฟรช
             </button>
-            <button className="btn btn-success" onClick={handleSave} disabled={saving}>
+            <button
+              style={{
+                padding: "12px 24px",
+                borderRadius: 16,
+                fontSize: "1rem",
+                fontWeight: 900,
+                background: "#7FDB9A",
+                border: "4px solid #2C3E50",
+                color: "#2C3E50",
+                cursor: saving ? "not-allowed" : "pointer",
+                opacity: saving ? 0.5 : 1,
+              }}
+              onClick={handleSave}
+              disabled={saving}
+            >
               {saving ? "กำลังบันทึก..." : "💾 บันทึกมิเตอร์"}
             </button>
           </div>

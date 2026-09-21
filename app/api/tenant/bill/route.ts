@@ -1,45 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getCurrentUserId, getTenantMembership } from "@/lib/auth";
 
-// GET /api/tenant/bill — returns the latest bill for the session tenant's room
-// Security: roomId is sourced from session.userId → tenant.roomId, never from client
+export const runtime = "nodejs";
+
+function roomForUi(room: any) { return { ...room, location: room.Apartment }; }
+
 export async function GET() {
-  const session = await getSession();
-  if (!session.userId || session.role !== "tenant") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: session.userId },
-    include: {
-      room: {
-        include: {
-          location: { select: { id: true, name: true } },
-          options: true,
-        },
-      },
-    },
-  });
-
-  if (!tenant) {
-    return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
-  }
-
-  if (!tenant.roomId || !tenant.room) {
-    return NextResponse.json({ tenant: { id: tenant.id, name: tenant.name }, room: null, latestBill: null });
-  }
-
-  // Always filter by the session-derived roomId — never trust client input
+  const userId = await getCurrentUserId();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const membership = await getTenantMembership(userId);
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, displayName: true, email: true } });
+  const tenant = { id: userId, name: user?.displayName ?? user?.email ?? "ผู้เช่า", email: user?.email ?? "" };
+  if (!membership?.roomId || !membership.Room) return NextResponse.json({ tenant, room: null, latestBill: null });
   const latestBill = await prisma.bill.findFirst({
-    where: { roomId: tenant.roomId },
+    where: { roomId: membership.roomId },
     orderBy: { period: "desc" },
     include: { lineItems: true },
   });
-
-  return NextResponse.json({
-    tenant: { id: tenant.id, name: tenant.name, email: tenant.email },
-    room: tenant.room,
-    latestBill,
-  });
+  return NextResponse.json({ tenant, room: roomForUi(membership.Room), latestBill });
 }

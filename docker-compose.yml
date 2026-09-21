@@ -10,8 +10,8 @@ services:
       - "3004:3000"
     image: apartment-oat:latest
     environment:
-      # Session security (MUST be at least 32 characters random string)
-      SESSION_PASSWORD: ${SESSION_PASSWORD:-change-me-to-at-least-32-character-random-string}
+      # Session security (REQUIRED — no insecure default; must be >=32 random chars)
+      SESSION_PASSWORD: ${SESSION_PASSWORD:?set SESSION_PASSWORD to a random string >=32 chars}
 
       # Database (SQLite stored in volume)
       DATABASE_URL: "file:/app/data/app.db"
@@ -24,6 +24,16 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
 
+      # Daiyooo Account OIDC (relying party / public client — no client secret)
+      DAIYOOO_OIDC_ISSUER: ${DAIYOOO_OIDC_ISSUER:-https://account.daiyooo.com/api/auth}
+      DAIYOOO_OIDC_DISCOVERY_URL: ${DAIYOOO_OIDC_DISCOVERY_URL:-https://account.daiyooo.com/.well-known/openid-configuration}
+      DAIYOOO_OIDC_CLIENT_ID: ${DAIYOOO_OIDC_CLIENT_ID:-apartments}
+      DAIYOOO_OIDC_REDIRECT_URI: ${DAIYOOO_OIDC_REDIRECT_URI:-https://apartments.daiyooo.com/auth/callback}
+      DAIYOOO_OIDC_SCOPES: ${DAIYOOO_OIDC_SCOPES:-openid profile email}
+      # Optional OIDC prompt. Leave empty by default; Better Auth rejects select_account.
+      DAIYOOO_OIDC_PROMPT: ${DAIYOOO_OIDC_PROMPT:-}
+      PRODUCT_BASE_URL: ${PRODUCT_BASE_URL:-https://apartments.daiyooo.com}
+
       # Optional: Custom Thai font path for PDF generation
       # THAI_FONT_PATH: ${THAI_FONT_PATH:-/app/assets/fonts/Sarabun-Regular.ttf}
 
@@ -32,19 +42,10 @@ services:
       PORT: ${PORT:-3000}
 
     volumes:
-      # Persist SQLite database across container restarts
-      - app_data:/app/data
-
-      # Persist payment slips across container restarts
-      - app_uploads:/app/uploads
+      # Mount K3s NFS share for shared database
+      - /data/k3s/volumes/apartment-oat/data:/app/data
+      - /data/k3s/volumes/apartment-oat/uploads:/app/uploads
 
     restart: unless-stopped
 
-volumes:
-  # SQLite database directory
-  app_data:
-    driver: local
-
-  # Payment slips upload directory
-  app_uploads:
-    driver: local
+# volumes section removed - using direct NFS mounts instead

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
     "build": "next build",
     "start": "next start",
     "prisma:migrate": "prisma migrate dev",
@@ -13,7 +15,7 @@
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.9.0",
-    "@prisma/client": "^7.9.0",
+    "@prisma/client": "^7.10.0",
     "@types/bcrypt": "^6.0.0",
     "@types/nodemailer": "^8.0.1",
     "@types/pdfkit": "^0.17.6",
@@ -22,6 +24,7 @@
     "iron-session": "^8.0.4",
     "next": "16.2.11",
     "nodemailer": "^9.0.3",
+    "openid-client": "^6.8.1",
     "pdfkit": "^0.19.1",
     "prisma": "^7.9.0",
     "react": "19.2.4",
@@ -33,6 +36,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tsx": "^4.23.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

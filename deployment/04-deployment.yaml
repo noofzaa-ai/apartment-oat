@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apartment-oat-app
+  namespace: apartment-oat
+  labels:
+    app: apartment-oat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apartment-oat
+  template:
+    metadata:
+      labels:
+        app: apartment-oat
+    spec:
+      containers:
+      - name: apartment-oat
+        image: 192.168.1.74:30500/apartment-oat:IMAGE_TAG_PLACEHOLDER
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        envFrom:
+        - configMapRef:
+            name: apartment-oat-config
+        - secretRef:
+            name: apartment-oat-secrets
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        - name: uploads
+          mountPath: /app/uploads
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: data
+        hostPath:
+          path: /data/k3s/volumes/apartment-oat/data
+          type: DirectoryOrCreate
+      - name: uploads
+        hostPath:
+          path: /data/k3s/volumes/apartment-oat/uploads
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apartment-oat-service
+  namespace: apartment-oat
+spec:
+  type: ClusterIP
+  selector:
+    app: apartment-oat
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http

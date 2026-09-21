@@ -98,13 +98,14 @@ export default function TenantHistoryPage() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <main style={{ maxWidth: 720, margin: "0 auto", padding: "48px 20px" }} id="main-content">
+      <main style={{ maxWidth: 760, margin: "0 auto", padding: "56px 20px" }} id="main-content">
 
-        <div style={{ marginBottom: 24 }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em", marginBottom: 4 }}>
+        <div style={{ marginBottom: 36 }}>
+          <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", marginBottom: 8, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "3rem" }}>📄</span>
             ประวัติบิล
           </h1>
-          <p style={{ fontSize: "0.8125rem", color: "#475569" }}>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", marginTop: 8, fontWeight: 700 }}>
             {room ? `ห้อง ${room.roomNumber} · ${room.location.name} · ` : ""}
             คลิกที่บิลเพื่อดูรายละเอียดมิเตอร์
           </p>
@@ -114,40 +115,42 @@ export default function TenantHistoryPage() {
         <div
           role="region"
           aria-label="สรุปประวัติการชำระ"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 24 }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, marginBottom: 32 }}
         >
-          <StatBox value={String(bills.length)} label="บิลทั้งหมด" />
-          <StatBox value={String(paidCount)} label="ชำระแล้ว" color="#059669" />
-          <StatBox value={String(unpaidCount)} label="ค้างชำระ" color="#D97706" />
+          <StatBox value={String(bills.length)} label="บิลทั้งหมด" icon="📊" />
+          <StatBox value={String(paidCount)} label="ชำระแล้ว" color="#2C3E50" icon="💰" />
+          <StatBox value={String(unpaidCount)} label="ค้างชำระ" color="#2C3E50" icon="📄" />
         </div>
 
         {bills.length === 0 ? (
-          <div style={{ background: "white", border: "1px solid #E2E8F0", borderRadius: 12, padding: 48, textAlign: "center", color: "#475569" }}>
+          <div style={{ background: "linear-gradient(135deg, #ffffff 0%, #fefcfb 100%)", border: "none", borderRadius: 24, padding: 56, textAlign: "center", color: "#475569", boxShadow: "0 8px 32px rgba(15,23,42,0.08)" }}>
+            <div style={{ fontSize: "3rem", marginBottom: 16 }}>📄</div>
             ยังไม่มีประวัติบิล
           </div>
         ) : (
-          <div role="list" aria-label="รายการบิลย้อนหลัง" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div role="list" aria-label="รายการบิลย้อนหลัง" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {bills.map((bill) => {
               const isOpen = openBillId === bill.id;
               const isPaid = bill.paymentStatus === "PAID";
               const isSubmitted = bill.paymentStatus === "SUBMITTED";
               const badgeColor = isPaid
-                ? { bg: "#ECFDF5", border: "#A7F3D0", text: "#059669" }
+                ? { bg: "#7FDB9A", border: "#2C3E50", text: "#2C3E50" }
                 : isSubmitted
-                ? { bg: "#EFF6FF", border: "#BFDBFE", text: "#1D4ED8" }
-                : { bg: "#FFFBEB", border: "#FDE68A", text: "#D97706" };
-              const monthBadgeColor = isPaid ? "#059669" : isSubmitted ? "#1D4ED8" : "#2D5BE3";
-              const monthBadgeBg = isPaid ? "#ECFDF5" : isSubmitted ? "#EFF6FF" : "#EEF2FF";
+                ? { bg: "#B8D8E8", border: "#2C3E50", text: "#2C3E50" }
+                : { bg: "#FFD93D", border: "#2C3E50", text: "#2C3E50" };
+              const monthBadgeColor = "#2C3E50";
+              const monthBadgeBg = isPaid ? "#7FDB9A" : isSubmitted ? "#B8D8E8" : "#FFD93D";
 
               return (
                 <div
                   key={bill.id}
                   role="listitem"
                   style={{
-                    background: "white", border: "1px solid #E2E8F0",
-                    borderRadius: 12, boxShadow: "0 1px 3px rgba(15,23,42,0.08)",
+                    background: "#FFFFFF", 
+                    border: "4px solid #2C3E50",
+                    borderRadius: 24, 
                     overflow: "hidden",
-                    transition: "box-shadow 200ms ease, border-color 200ms ease",
+                    transition: "transform 200ms ease",
                   }}
                 >
                   {/* Clickable header */}
@@ -159,30 +162,38 @@ export default function TenantHistoryPage() {
                     onClick={() => toggleBill(bill.id)}
                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleBill(bill.id)}
                     style={{
-                      display: "flex", alignItems: "center", gap: 16,
-                      padding: "16px 20px", cursor: "pointer", userSelect: "none",
+                      display: "flex", alignItems: "center", gap: 18,
+                      padding: "22px 24px", cursor: "pointer", userSelect: "none",
                     }}
                   >
                     {/* Month badge */}
                     <div style={{
-                      width: 48, height: 48, borderRadius: 8, background: monthBadgeBg,
-                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0, lineHeight: 1,
+                      width: 64, 
+                      height: 64, 
+                      borderRadius: 16, 
+                      background: monthBadgeBg,
+                      border: "3px solid #2C3E50",
+                      display: "flex", 
+                      flexDirection: "column", 
+                      alignItems: "center", 
+                      justifyContent: "center",
+                      flexShrink: 0, 
+                      lineHeight: 1,
                     }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: monthBadgeColor, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: monthBadgeColor, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                         {shortMonthThai(bill.period)}
                       </span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: monthBadgeColor, opacity: 0.7 }}>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: monthBadgeColor }}>
                         {thaiYearFromPeriod(bill.period)}
                       </span>
                     </div>
 
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "1rem", fontWeight: 700, color: "#0F172A", marginBottom: 2 }}>
+                      <div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#2C3E50", marginBottom: 4 }}>
                         {thaiPeriod(bill.period)}
                       </div>
-                      <div style={{ fontSize: "0.75rem", color: "#94A3B8" }}>
+                      <div style={{ fontSize: "0.875rem", color: "#2C3E50", fontWeight: 700 }}>
                         {isPaid && bill.paidAt
                           ? `ชำระ ${new Date(bill.paidAt).toLocaleDateString("th-TH")}`
                           : isSubmitted
@@ -194,29 +205,29 @@ export default function TenantHistoryPage() {
                     </div>
 
                     {/* Right: amount + badge + chevron */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
                       <div>
                         <div style={{
-                          fontFamily: "'JetBrains Mono', monospace", fontSize: "1rem",
-                          fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "#0F172A", textAlign: "right",
+                          fontFamily: "'JetBrains Mono', monospace", fontSize: "1.5rem",
+                          fontWeight: 900, fontVariantNumeric: "tabular-nums", color: "#2C3E50", textAlign: "right",
                         }}>
                           {fmt(bill.total)} ฿
                         </div>
-                        <div style={{ textAlign: "right", marginTop: 3 }}>
+                        <div style={{ textAlign: "right", marginTop: 6 }}>
                           <span style={{
-                            display: "inline-flex", alignItems: "center", gap: 5,
-                            padding: "3px 10px", borderRadius: 9999,
-                            fontSize: "0.75rem", fontWeight: 600,
-                            background: badgeColor.bg, border: `1px solid ${badgeColor.border}`, color: badgeColor.text,
+                            display: "inline-flex", alignItems: "center", gap: 6,
+                            padding: "6px 14px", borderRadius: 16,
+                            fontSize: "0.875rem", fontWeight: 800,
+                            background: badgeColor.bg, border: `4px solid ${badgeColor.border}`, color: badgeColor.text,
                           }}>
-                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: badgeColor.text, flexShrink: 0 }} />
+                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: badgeColor.text, flexShrink: 0 }} />
                             {isPaid ? "จ่ายแล้ว" : isSubmitted ? "รอยืนยัน" : "ค้างชำระ"}
                           </span>
                         </div>
                       </div>
                       <svg
-                        viewBox="0 0 24 24" width="20" height="20"
-                        fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"
+                        viewBox="0 0 24 24" width="24" height="24"
+                        fill="none" stroke="#2C3E50" strokeWidth="3" strokeLinecap="round"
                         aria-hidden="true"
                         style={{ flexShrink: 0, transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 200ms ease" }}
                       >
@@ -229,14 +240,14 @@ export default function TenantHistoryPage() {
                   {isOpen && (
                     <div id={`detail-${bill.id}`}>
                       {bill.currReading && (
-                        <div style={{ padding: "16px 20px", background: "#F8FAFC", borderTop: "1px solid #F1F5F9" }}>
-                          <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>
+                        <div style={{ padding: "20px 24px", background: "#FFF8F0", borderTop: "3px solid #2C3E50" }}>
+                          <div style={{ fontSize: "1rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "0.02em", textTransform: "uppercase", marginBottom: 16 }}>
                             มิเตอร์เดือนนี้
                           </div>
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             {/* Water */}
-                            <div style={{ background: "white", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 16px" }}>
-                              <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#0284C7", marginBottom: 8 }}>
+                            <div style={{ background: "#B8D8E8", border: "3px solid #2C3E50", borderRadius: 16, padding: "16px 20px" }}>
+                              <div style={{ fontSize: "0.875rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.05em", color: "#2C3E50", marginBottom: 12 }}>
                                 น้ำประปา
                               </div>
                               {bill.prevReading && (
@@ -244,17 +255,17 @@ export default function TenantHistoryPage() {
                               )}
                               <MeterRow label="เดือนนี้" value={bill.currReading.waterReading} />
                               <span style={{
-                                display: "inline-block", marginTop: 8,
-                                padding: "2px 8px", borderRadius: 9999,
-                                fontSize: 11, fontWeight: 700, fontFamily: "monospace",
-                                background: "#E0F2FE", color: "#0369A1",
+                                display: "inline-block", marginTop: 10,
+                                padding: "6px 12px", borderRadius: 12,
+                                fontSize: 13, fontWeight: 900, fontFamily: "monospace",
+                                background: "#2C3E50", color: "#FFFFFF", border: "2px solid #2C3E50",
                               }}>
                                 ใช้ {bill.waterUnits} หน่วย
                               </span>
                             </div>
                             {/* Electric */}
-                            <div style={{ background: "white", border: "1px solid #E2E8F0", borderRadius: 8, padding: "12px 16px" }}>
-                              <div style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#D97706", marginBottom: 8 }}>
+                            <div style={{ background: "#FFD93D", border: "3px solid #2C3E50", borderRadius: 16, padding: "16px 20px" }}>
+                              <div style={{ fontSize: "0.875rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.05em", color: "#2C3E50", marginBottom: 12 }}>
                                 ไฟฟ้า
                               </div>
                               {bill.prevReading && (
@@ -262,10 +273,10 @@ export default function TenantHistoryPage() {
                               )}
                               <MeterRow label="เดือนนี้" value={bill.currReading.electricReading} />
                               <span style={{
-                                display: "inline-block", marginTop: 8,
-                                padding: "2px 8px", borderRadius: 9999,
-                                fontSize: 11, fontWeight: 700, fontFamily: "monospace",
-                                background: "#FEF3C7", color: "#92400E",
+                                display: "inline-block", marginTop: 10,
+                                padding: "6px 12px", borderRadius: 12,
+                                fontSize: 13, fontWeight: 900, fontFamily: "monospace",
+                                background: "#2C3E50", color: "#FFFFFF", border: "2px solid #2C3E50",
                               }}>
                                 ใช้ {bill.electricUnits} หน่วย
                               </span>
@@ -273,12 +284,24 @@ export default function TenantHistoryPage() {
                           </div>
                         </div>
                       )}
-                      <div style={{ display: "flex", gap: 8, padding: "12px 20px", borderTop: "1px solid #F1F5F9" }}>
+                      <div style={{ display: "flex", gap: 12, padding: "16px 24px", borderTop: "3px solid #2C3E50", background: "#FFF8F0" }}>
                         <button
-                          className="btn btn-secondary btn-sm"
+                          style={{
+                            padding: "12px 24px",
+                            background: "#B8D8E8",
+                            border: "3px solid #2C3E50",
+                            borderRadius: 16,
+                            fontSize: "1rem",
+                            fontWeight: 900,
+                            color: "#2C3E50",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
                           onClick={() => handleDownloadPdf(bill)}
                         >
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                             <polyline points="7 10 12 15 17 10" />
                             <line x1="12" y1="15" x2="12" y2="3" />
@@ -298,20 +321,24 @@ export default function TenantHistoryPage() {
   );
 }
 
-function StatBox({ value, label, color }: { value: string; label: string; color?: string }) {
+function StatBox({ value, label, color, icon }: { value: string; label: string; color?: string; icon?: string }) {
   return (
     <div style={{
-      background: "white", border: "1px solid #E2E8F0", borderRadius: 12,
-      padding: "16px 20px", boxShadow: "0 1px 3px rgba(15,23,42,0.08)", textAlign: "center",
+      background: "#FFFFFF", 
+      border: "4px solid #2C3E50", 
+      borderRadius: 20,
+      padding: "22px 20px", 
+      textAlign: "center",
     }}>
+      {icon && <div style={{ fontSize: "2.5rem", marginBottom: 12 }}>{icon}</div>}
       <div style={{
-        fontSize: "1.375rem", fontWeight: 800, fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "2rem", fontWeight: 900, fontFamily: "'JetBrains Mono', monospace",
         fontVariantNumeric: "tabular-nums", letterSpacing: "-0.02em", lineHeight: 1.25,
-        color: color ?? "#0F172A",
+        color: color ?? "#2C3E50",
       }}>
         {value}
       </div>
-      <div style={{ fontSize: "0.75rem", fontWeight: 600, color: "#475569", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 4 }}>
+      <div style={{ fontSize: "0.875rem", fontWeight: 800, color: "#2C3E50", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 8 }}>
         {label}
       </div>
     </div>
@@ -320,9 +347,9 @@ function StatBox({ value, label, color }: { value: string; label: string; color?
 
 function MeterRow({ label, value }: { label: string; value: number }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#475569", marginBottom: 2 }}>
+    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem", color: "#2C3E50", marginBottom: 6, fontWeight: 700 }}>
       <span>{label}</span>
-      <span style={{ fontFamily: "monospace", fontVariantNumeric: "tabular-nums", fontWeight: 600, color: "#0F172A" }}>
+      <span style={{ fontFamily: "monospace", fontVariantNumeric: "tabular-nums", fontWeight: 900, color: "#2C3E50" }}>
         {value.toLocaleString()}
       </span>
     </div>

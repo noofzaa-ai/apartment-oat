@@ -37,6 +37,16 @@ interface RoomForm {
   options: RoomOption[];
 }
 
+interface RoomPreset {
+  id: number;
+  name: string;
+  roomType: string | null;
+  baseRent: number;
+  waterRate: number;
+  electricRate: number;
+  options: RoomOption[];
+}
+
 const ROOM_TYPES = ["ห้องเดี่ยว", "ห้องคู่", "ห้องสตูดิโอ", "ห้อง 1 ห้องนอน", "ห้อง 2 ห้องนอน", "อื่นๆ"];
 
 function fmt(n: number) {
@@ -50,6 +60,7 @@ function RoomsContent() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(locationIdParam || "");
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [presets, setPresets] = useState<RoomPreset[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Room | null>(null);
@@ -62,6 +73,7 @@ function RoomsContent() {
     electricRate: "",
     options: [],
   });
+  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
   const [errors, setErrors] = useState<Partial<RoomForm>>({});
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -91,15 +103,45 @@ function RoomsContent() {
     }
   }, [selectedLocationId]);
 
+  const loadPresets = useCallback(async () => {
+    if (!selectedLocationId) return;
+    try {
+      const res = await fetch(`/api/admin/room-presets?apartmentId=${selectedLocationId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPresets(data);
+      }
+    } catch {
+      // Silent fail - presets are optional
+    }
+  }, [selectedLocationId]);
+
   useEffect(() => {
     loadRooms();
-  }, [loadRooms]);
+    loadPresets();
+  }, [loadRooms, loadPresets]);
 
   const openAdd = () => {
     setEditTarget(null);
     setForm({ roomNumber: "", roomType: "", baseRent: "", waterRate: "18", electricRate: "7", options: [] });
+    setSelectedPresetId("");
     setErrors({});
     setModalOpen(true);
+  };
+
+  const applyPreset = (presetId: string) => {
+    setSelectedPresetId(presetId);
+    if (!presetId) return;
+    const preset = presets.find((p) => String(p.id) === presetId);
+    if (!preset) return;
+    setForm({
+      ...form,
+      roomType: preset.roomType || "",
+      baseRent: String(preset.baseRent),
+      waterRate: String(preset.waterRate),
+      electricRate: String(preset.electricRate),
+      options: preset.options.map((o) => ({ name: o.name, price: o.price })),
+    });
   };
 
   const openEdit = (room: Room) => {
@@ -193,20 +235,33 @@ function RoomsContent() {
     <>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="page-header">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32, flexWrap: "wrap", gap: 20 }}>
         <div>
-          <div className="breadcrumb">
-            <Link href="/locations">หอพัก</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: "0.875rem", color: "#2C3E50", fontWeight: 600 }}>
+            <Link href="/app/locations" style={{ color: "#2C3E50", textDecoration: "none" }}>🏢 หอพัก</Link>
             <span>›</span>
             <span>{selectedLocation?.name || "ห้อง"}</span>
           </div>
-          <h1 className="page-title">ห้อง</h1>
+          <h1 style={{ fontSize: "3rem", fontWeight: 900, color: "#2C3E50", letterSpacing: "-0.02em", margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: "3rem" }}>🚪</span>
+            ห้อง
+          </h1>
         </div>
-        <div className="page-actions">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <select
             value={selectedLocationId}
             onChange={(e) => setSelectedLocationId(e.target.value)}
-            style={{ width: "auto", minWidth: 160 }}
+            style={{
+              padding: "12px 16px",
+              borderRadius: 12,
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              background: "#FFFFFF",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              minWidth: 160,
+              cursor: "pointer",
+            }}
           >
             <option value="">-- เลือกหอพัก --</option>
             {locations.map((l) => (
@@ -216,28 +271,111 @@ function RoomsContent() {
             ))}
           </select>
           {selectedLocationId && (
-            <button className="btn btn-primary" onClick={openAdd}>
-              + เพิ่มห้อง
-            </button>
+            <>
+              <Link
+                href={`/app/apartments/${selectedLocationId}/presets`}
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#B8D8E8",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                ⚙️ Preset
+              </Link>
+              <Link
+                href={`/app/apartments/${selectedLocationId}/rooms/bulk`}
+                style={{
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#B8D8E8",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                📋 สร้างหลายห้อง
+              </Link>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#7FDB9A",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: "pointer",
+                }}
+                onClick={openAdd}
+              >
+                + เพิ่มห้อง
+              </button>
+            </>
           )}
         </div>
       </div>
 
       {!selectedLocationId ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🏠</div>
-          <p className="empty-state-text">กรุณาเลือกหอพักก่อน</p>
-          <Link href="/locations" className="btn btn-primary">
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 24, padding: "64px 40px", textAlign: "center" }}>
+          <div style={{ fontSize: "5rem", marginBottom: 16 }}>🏠</div>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700, marginBottom: 24 }}>
+            กรุณาเลือกหอพักก่อน
+          </p>
+          <Link
+            href="/app/locations"
+            style={{
+              padding: "14px 28px",
+              borderRadius: 16,
+              fontSize: "1rem",
+              fontWeight: 900,
+              background: "#7FDB9A",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             ไปที่หน้าหอพัก
           </Link>
         </div>
       ) : loading ? (
-        <div className="loading">กำลังโหลด...</div>
+        <div style={{ textAlign: "center", padding: 64, fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700 }}>
+          กำลังโหลด...
+        </div>
       ) : rooms.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🚪</div>
-          <p className="empty-state-text">ยังไม่มีห้องในหอพักนี้</p>
-          <button className="btn btn-primary" onClick={openAdd}>
+        <div style={{ background: "#FFFFFF", border: "4px solid #2C3E50", borderRadius: 24, padding: "64px 40px", textAlign: "center" }}>
+          <div style={{ fontSize: "5rem", marginBottom: 16 }}>🚪</div>
+          <p style={{ fontSize: "1.125rem", color: "#2C3E50", fontWeight: 700, marginBottom: 24 }}>
+            ยังไม่มีห้องในหอพักนี้
+          </p>
+          <button
+            style={{
+              padding: "14px 28px",
+              borderRadius: 16,
+              fontSize: "1rem",
+              fontWeight: 900,
+              background: "#7FDB9A",
+              border: "4px solid #2C3E50",
+              color: "#2C3E50",
+              cursor: "pointer",
+            }}
+            onClick={openAdd}
+          >
             เพิ่มห้องแรก
           </button>
         </div>
@@ -278,10 +416,34 @@ function RoomsContent() {
                   </td>
                   <td>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button className="btn btn-secondary btn-sm" onClick={() => openEdit(room)}>
+                      <button
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 8,
+                          fontSize: "0.875rem",
+                          fontWeight: 700,
+                          background: "#B8D8E8",
+                          border: "3px solid #2C3E50",
+                          color: "#2C3E50",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => openEdit(room)}
+                      >
                         แก้ไข
                       </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteModal(room)}>
+                      <button
+                        style={{
+                          padding: "8px 16px",
+                          borderRadius: 8,
+                          fontSize: "0.875rem",
+                          fontWeight: 700,
+                          background: "#FFD93D",
+                          border: "3px solid #2C3E50",
+                          color: "#2C3E50",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setDeleteModal(room)}
+                      >
                         ลบ
                       </button>
                     </div>
@@ -303,6 +465,22 @@ function RoomsContent() {
             </div>
             <div className="modal-body">
               <div className="form">
+                {!editTarget && presets.length > 0 && (
+                  <div className="form-group" style={{ marginBottom: "var(--space-md)" }}>
+                    <label>เลือกจาก Preset (ไม่บังคับ)</label>
+                    <select
+                      value={selectedPresetId}
+                      onChange={(e) => applyPreset(e.target.value)}
+                    >
+                      <option value="">-- ไม่ใช้ preset --</option>
+                      {presets.map((p) => (
+                        <option key={p.id} value={String(p.id)}>
+                          {p.name} ({p.baseRent.toLocaleString("th-TH")}฿)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>เลขห้อง <span className="required">*</span></label>
@@ -422,10 +600,36 @@ function RoomsContent() {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setModalOpen(false)} disabled={saving}>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#FFFFFF",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: saving ? "not-allowed" : "pointer",
+                }}
+                onClick={() => setModalOpen(false)}
+                disabled={saving}
+              >
                 ยกเลิก
               </button>
-              <button className="btn btn-success" onClick={handleSave} disabled={saving}>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: saving ? "#CBD5E1" : "#7FDB9A",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: saving ? "not-allowed" : "pointer",
+                }}
+                onClick={handleSave}
+                disabled={saving}
+              >
                 {saving ? "กำลังบันทึก..." : "บันทึก"}
               </button>
             </div>
@@ -452,8 +656,36 @@ function RoomsContent() {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setDeleteModal(null)} disabled={saving}>ยกเลิก</button>
-              <button className="btn btn-danger" onClick={handleDelete} disabled={saving}>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: "#FFFFFF",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: saving ? "not-allowed" : "pointer",
+                }}
+                onClick={() => setDeleteModal(null)}
+                disabled={saving}
+              >
+                ยกเลิก
+              </button>
+              <button
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: 12,
+                  fontSize: "0.95rem",
+                  fontWeight: 900,
+                  background: saving ? "#CBD5E1" : "#FFD93D",
+                  border: "4px solid #2C3E50",
+                  color: "#2C3E50",
+                  cursor: saving ? "not-allowed" : "pointer",
+                }}
+                onClick={handleDelete}
+                disabled={saving}
+              >
                 {saving ? "กำลังลบ..." : "ลบ"}
               </button>
             </div>

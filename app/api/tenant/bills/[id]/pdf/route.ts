@@ -1,70 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/session";
+import { getCurrentUserId, getTenantMembership } from "@/lib/auth";
 import { generateBillPdf } from "@/lib/pdf";
 
-// GET /api/tenant/bills/[id]/pdf — download bill as PDF (tenant, own room only)
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession();
-  if (!session.userId || session.role !== "tenant") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const runtime = "nodejs";
+type Ctx = { params: Promise<{ id: string }> };
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: session.userId },
-    select: { roomId: true },
-  });
-
-  if (!tenant?.roomId) {
-    return NextResponse.json({ error: "ไม่พบห้อง" }, { status: 404 });
-  }
-
+export async function GET(_req: NextRequest, { params }: Ctx) {
+  const userId = await getCurrentUserId();
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const membership = await getTenantMembership(userId);
+  if (!membership?.roomId) return NextResponse.json({ error: "ไม่พบห้อง" }, { status: 404 });
   const { id } = await params;
-  const billId = Number(id);
-
   const bill = await prisma.bill.findFirst({
-    where: { id: billId, roomId: tenant.roomId },
-    include: {
-      lineItems: true,
-      room: {
-        include: {
-          location: { select: { name: true } },
-        },
-      },
-    },
+    where: { id: Number(id), roomId: membership.roomId },
+    include: { lineItems: true, room: { include: { Apartment: { select: { name: true } } } } },
   });
-
-  if (!bill) {
-    return NextResponse.json({ error: "ไม่พบบิล" }, { status: 404 });
-  }
-
+  if (!bill) return NextResponse.json({ error: "ไม่พบบิล" }, { status: 404 });
   const pdfBuffer = await generateBillPdf({
-    locationName: bill.room.location.name,
-    roomNumber: bill.room.roomNumber,
-    roomType: bill.room.roomType,
-    period: bill.period,
-    baseRent: bill.baseRent,
-    waterUnits: bill.waterUnits,
-    waterCost: bill.waterCost,
-    waterRate: bill.room.waterRate,
-    electricUnits: bill.electricUnits,
-    electricCost: bill.electricCost,
-    electricRate: bill.room.electricRate,
-    optionsCost: bill.optionsCost,
-    total: bill.total,
-    paymentStatus: bill.paymentStatus,
-    paidAt: bill.paidAt,
-    lineItems: bill.lineItems,
+    locationName: bill.room.Apartment.name, roomNumber: bill.room.roomNumber, roomType: bill.room.roomType,
+    period: bill.period, baseRent: bill.baseRent, waterUnits: bill.waterUnits, waterCost: bill.waterCost, waterRate: bill.room.waterRate,
+    electricUnits: bill.electricUnits, electricCost: bill.electricCost, electricRate: bill.room.electricRate,
+    optionsCost: bill.optionsCost, total: bill.total, paymentStatus: bill.paymentStatus, paidAt: bill.paidAt, lineItems: bill.lineItems,
   });
-
-  const filename = `bill-${bill.room.roomNumber}-${bill.period}.pdf`;
-
   return new NextResponse(pdfBuffer as unknown as BodyInit, {
     status: 200,
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Content-Length": String(pdfBuffer.length),
-    },
+    headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="bill-${bill.room.roomNumber}-${bill.period}.pdf"`, "Content-Length": String(pdfBuffer.length) },
   });
 }

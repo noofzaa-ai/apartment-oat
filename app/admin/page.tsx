@@ -34,8 +34,8 @@ export default function AdminDashboard() {
 
         const userRole = data.user?.role;
         if (userRole !== "PLATFORM_ADMIN" && userRole !== "SUPER_ADMIN") {
-          // Not authorized - redirect to regular app
-          router.replace("/app");
+          // Not authorized - redirect to get-started
+          router.replace("/get-started");
           return;
         }
 

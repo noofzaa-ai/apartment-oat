@@ -165,7 +165,31 @@ export default function GetStartedPage() {
       )}
 
       {/* Header */}
-      <div style={{ maxWidth: 1280, margin: "0 auto 48px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto 48px", position: "relative" }}>
+        {/* Logout Button */}
+        <button
+          onClick={() => window.location.href = '/api/auth/logout'}
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            border: "4px solid #2C3E50",
+            borderRadius: 24,
+            background: "#FFB3BA",
+            padding: "12px 24px",
+            color: "#2C3E50",
+            fontWeight: 900,
+            fontSize: "1rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            zIndex: 10
+          }}
+        >
+          🚪 ออกจากระบบ
+        </button>
+
         {/* Hero Title */}
         <div style={{
           border: "4px solid #2C3E50",

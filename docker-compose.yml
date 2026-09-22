@@ -34,6 +34,9 @@ services:
       DAIYOOO_OIDC_PROMPT: ${DAIYOOO_OIDC_PROMPT:-}
       PRODUCT_BASE_URL: ${PRODUCT_BASE_URL:-https://apartments.daiyooo.com}
 
+      # Platform admin emails (comma-separated) for auto-promotion
+      PLATFORM_ADMIN_EMAILS: ${PLATFORM_ADMIN_EMAILS:-}
+
       # Optional: Custom Thai font path for PDF generation
       # THAI_FONT_PATH: ${THAI_FONT_PATH:-/app/assets/fonts/Sarabun-Regular.ttf}
 

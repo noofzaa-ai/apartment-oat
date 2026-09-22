@@ -33,7 +33,7 @@ export async function GET() {
   const [user, subscription, tenantMembership] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.userId },
-      select: { id: true, displayName: true, email: true },
+      select: { id: true, displayName: true, email: true, role: true },
     }),
     prisma.subscription.findUnique({
       where: { userId: session.userId },

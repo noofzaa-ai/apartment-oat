@@ -98,6 +98,24 @@ Deploy: Docker container `apartment-oat-app` (port 3004→3000) หลัง Clo
 - Neo-brutalist design ตลอด
 - **Deploy:** commit 4835cce (2026-09-21), invite modal รองรับ URL parsing
 
+### 8. Platform Admin Panel — ✅ เสร็จ (Phase 1-3)
+- **Access:** `/admin` — platform admin เท่านั้น (role = PLATFORM_ADMIN หรือ SUPER_ADMIN)
+- **Database schema:**
+  - `User.role` (USER | PLATFORM_ADMIN | SUPER_ADMIN), `User.status` (ACTIVE | SUSPENDED | DELETED), `User.lastLoginAt`
+  - ตาราง `AdminNote` (admin notes สำหรับ user/apartment/subscription)
+  - ตาราง `AuditLog` (audit trail, ยังไม่ integrate)
+- **Middleware:** `lib/admin-auth.ts` — requirePlatformAdmin() และ requireSuperAdmin()
+- **Dashboard** (`/admin`) — metrics cards: Total Users, Active Subscriptions, Trial Users, Total Apartments, Total Rooms, MRR
+- **User Management** (`/admin/users`, `/admin/users/[id]`) — list, detail, admin notes
+- **Subscription Management** (`/admin/subscriptions`, `/admin/subscriptions/[id]`) — list, detail, extend trial, change plan, cancel
+- **Apartment Management** (`/admin/apartments`) — list apartments พร้อม filters (ยัง partial, detail page ยังไม่เสร็จ)
+- **Audit Logs** (`/admin/logs`) — placeholder (ยังไม่ implement API)
+- **Dark professional theme** — แยกจาก owner/tenant portal
+- **Admin promotion:**
+  - ENV: `PLATFORM_ADMIN_EMAILS` (comma-separated list, ยังไม่มี auto-promote middleware)
+  - CLI: `scripts/check-and-promote-admin.ts` (promote ด้วยมือ)
+- **Status:** Phase 1-3 พร้อมใช้งาน; ยังขาด auto-promote, audit log viewer, suspend/delete actions
+
 ---
 
 ## Data model (Prisma / SQLite)
@@ -124,7 +142,9 @@ Deploy: Docker container `apartment-oat-app` (port 3004→3000) หลัง Clo
 - [x] Pricing Plans (TRIAL/STARTER/STANDARD/PRO) + feature gates + quotas
 - [x] Onboarding flow สำหรับ user ใหม่ (/get-started)
 - [x] Neo-brutalist design (thick borders, flat colors, no shadows)
-- [ ] Platform admin ที่ `/admin` (user management ของแพลตฟอร์มจริง)
+- [x] Platform admin panel Phase 1-3 (dashboard, users, subscriptions, apartments list)
+- [ ] Admin auto-promote middleware + audit log integration
+- [ ] Admin actions: suspend/delete user, delete/transfer apartment
 - [ ] Payment Gateway integration (Stripe/Omise) — Phase 6
 
 ## Environment (สำคัญ)
@@ -133,3 +153,4 @@ Deploy: Docker container `apartment-oat-app` (port 3004→3000) หลัง Clo
 - `DAIYOOO_OIDC_ISSUER`, `DAIYOOO_OIDC_DISCOVERY_URL`, `DAIYOOO_OIDC_CLIENT_ID=apartments`, `DAIYOOO_OIDC_REDIRECT_URI=https://apartments.daiyooo.com/auth/callback`, `DAIYOOO_OIDC_SCOPES`
 - `PRODUCT_BASE_URL=https://apartments.daiyooo.com`
 - `DATABASE_URL` (dev `file:./dev.db`, prod `file:/app/data/app.db` ใน volume)
+- `PLATFORM_ADMIN_EMAILS` (optional, comma-separated list สำหรับ auto-promote admin — ยังไม่ implement middleware)
